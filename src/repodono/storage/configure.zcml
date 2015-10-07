@@ -1,0 +1,45 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    i18n_domain="repodono.storage">
+
+  <includeDependencies package="." />
+
+  <i18n:registerTranslations directory="locales" />
+
+  <include package=".browser" />
+
+
+  <genericsetup:registerProfile
+      name="default"
+      title="repodono.storage"
+      directory="profiles/default"
+      description="Installs the repodono.storage add-on."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      />
+
+  <genericsetup:importStep
+      name="repodono.storage-postInstall"
+      title="repodono.storage post_install import step"
+      description="Post install import step from repodono.storage"
+      handler=".setuphandlers.post_install">
+  </genericsetup:importStep>
+
+  <genericsetup:registerProfile
+      name="uninstall"
+      title="repodono.storage"
+      directory="profiles/uninstall"
+      description="Uninstalls the repodono.storage add-on."
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+      />
+
+  <genericsetup:importStep
+      name="repodono.storage-uninstall"
+      title="repodono.storage uninstall import step"
+      description="Import step run during ininstalling repodono.storage"
+      handler=".setuphandlers.uninstall">
+  </genericsetup:importStep>
+
+</configure>
