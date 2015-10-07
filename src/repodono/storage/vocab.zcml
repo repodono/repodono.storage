@@ -1,0 +1,11 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    i18n_domain="repodono.storage">
+
+  <utility
+      provides="zope.schema.interfaces.IVocabularyFactory"
+      factory=".vocab.StorageBackendVocabFactory"
+      name="repodono.storage.backends"
+      />
+
+</configure>
