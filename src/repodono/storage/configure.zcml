@@ -9,6 +9,7 @@
 
   <i18n:registerTranslations directory="locales" />
 
+  <include file="annotation.zcml" />
   <include package=".browser" />
   <include file="vocab.zcml" />
 
