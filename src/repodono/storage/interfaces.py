@@ -14,27 +14,66 @@ class IRepodonoStorageLayer(IDefaultBrowserLayer):
 
 class IStorageInfo(Interface):
     """
-    Storage information
-
-    The fields defined here are the minimum required information to
-    instantiate a Storage instance for a given context that implements
-    IWorkspace.
-
-    The actual implementation should be a generic class to ensure
-    portability.
+    These are the bare minimum, generic attributes required to get a
+    backend instantiated.  All of these are associated with a given
+    context, can be done via IAnnotation or some other means.
     """
-
-    path = schema.TextLine(
-        title=_(u'Path'),
-        description=_(u'The absolute path on the file system for this object'),
-        required=False,
-    )
 
     backend = schema.Choice(
         title=_(u'Backend'),
+        description=_(u'The identifier for the backend.'),
         required=True,
         vocabulary='repodono.storage.backend',
     )
+
+    path = schema.TextLine(
+        title=_(u'Path'),
+        description=_(u'The path argument that is required to instantiate the '
+            'backend for this context.'),
+        required=False,
+    )
+
+
+class IStorageFactory(Interface):
+    """
+    The IStorageFactory is an adapter that will accept a context as part
+    of its instantiation, which can then be called again to instantiate
+    the IStorage instance, specific to the information in the attributes
+    captured by IStorageInfo.
+
+    With ``context`` as a Dexterity item, the verbose instantiation can
+    be done like so::
+
+        >>> storage_info = IStorageInfo(context)
+        >>> backend = getUtility(IStorageBackend, name=storage_info.backend)
+        >>> storage = backend(storage_info)  # for the rest of the arguments.
+
+    The storage factory simply encapsulates the first two lines to
+    produce storage instances.  Reason for multiple instances to a given
+    context is implementation specific but should be supported here.
+    Example::
+
+        >>> storage_factory = IStorageFactory(context)
+        >>> storage = storage_factory()
+
+    Ultimately, this should be contracted to::
+
+        >>> storage = IStorage(context)
+
+    The minimum implementation should be a generic class to ensure
+    reusability by the users of this framework.
+    """
+
+    def get_storage():
+        """
+        Return the storage instance as defined with the information
+        contained with the attributes here.
+        """
+
+    def get_storage_backend():
+        """
+        Return the storage backend defined by backend attribute.
+        """
 
 
 class IStorage(Interface):
