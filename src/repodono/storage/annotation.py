@@ -6,8 +6,6 @@ from zope.annotation.interfaces import IAnnotatable
 from zope.annotation.interfaces import IAnnotations
 from persistent.mapping import PersistentMapping
 
-from repodono.storage.interfaces import IStorageInfo
-
 _marker = object()
 
 
