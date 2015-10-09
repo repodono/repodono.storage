@@ -2,11 +2,12 @@ from zope.interface import implementer
 from zope.component import adapter
 from zope.annotation.interfaces import IAnnotatable
 from zope.annotation.interfaces import IAnnotations
-from persistent.dict import PersistentDict
+from persistent.mapping import PersistentMapping
 
 from repodono.storage.interfaces import IStorageInfo
 
 PREFIX = __name__  # this module name
+_marker = object()
 
 
 def to_key(prefix, name):
@@ -15,7 +16,7 @@ def to_key(prefix, name):
 def _setup_dict_annotation(context, key):
     annotations = IAnnotations(context)
     if not key in annotations:
-        annotations[key] = PersistentDict()
+        annotations[key] = PersistentMapping()
         return True
 
 def _teardown_dict_annotation(context, key):
@@ -26,15 +27,22 @@ def _teardown_dict_annotation(context, key):
 
 def factory(iface, _key=None):
     """
-    Factory that takes a class and an interface to construct a new class
-    that provides helper classmethods to the above functions (as a pair
-    of install/uninstall methods) and also an adapter to an IAnnotatable
-    that returns an object with the fields specified in the interface
-    iface, while also implementing that interface.
+    A class decorator to a class to turn it into an annotation that
+    requires an explicit installation and backed by a PersistentMapping,
+    instead of the usual implicit method that has the potential to leave
+    behind stale objects to classes that may no longer exist.
 
-    The resulting object acts as a view to the attributes.  This means
-    an explicit write action is required to persist the value back into
-    the annotation.
+    This works like a factory that will take a class and an interface,
+    returning a new class that implements the interface.  This new class
+    is able to adapt any IAnnotatable, provided that the context was
+    previously installed with the classmethod ``install``.
+
+    An ``uninstall`` classmethod is also provided which will remove the
+    PersistentMapping identified by key.
+
+    Naturally, the class can contain ``FieldProperty`` properties that
+    are based on the interface schema that is about to be implemented by
+    this.
     """
 
     # need the key argument but not the iface is due to python being
@@ -60,12 +68,35 @@ def factory(iface, _key=None):
                     raise TypeError('Could not instantiate a `%s` from %s' %
                         (key, context))
                 d = annotations[key]
-                for name in iface.names():
-                    setattr(self, name, d.get(name))
+                for name in iface.names(all=True):
+                    value = d.get(name, _marker)
+                    if value is _marker:
+                        # undefined values are not touched, only define
+                        # the attribute on the instance if it doesn't
+                        # already exist
+                        if hasattr(self, name):
+                            continue
+
+                    # set the loaded value to the instance only.
+                    super(Annotation, self).__setattr__(name, d.get(name))
+
                 # finally associate context to the instance.
-                self.context = context
+                super(Annotation, self).__setattr__('context', context)
 
                 super(class_, self).__init__(*a, **kw)
+
+            def __setattr__(self, name, value):
+                """
+                Whenever an attribute is set, persist it into the
+                underyling PersistentMapping.
+                """
+
+                super(Annotation, self).__setattr__(name, value)
+                if name not in iface.names(all=True):
+                    return
+                annotations = IAnnotations(self.context)
+                d = annotations[key]
+                d[name] = value
 
             @classmethod
             def install(cls, context):
@@ -84,6 +115,6 @@ def factory(iface, _key=None):
 
                 _teardown_dict_annotation(context, key)
 
-        return type(class_.__name__, (Annotation, class_), {})
+        return type(class_.__name__, (Annotation,), {})
 
     return decorator
