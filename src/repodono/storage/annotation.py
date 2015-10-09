@@ -8,7 +8,6 @@ from persistent.mapping import PersistentMapping
 
 from repodono.storage.interfaces import IStorageInfo
 
-PREFIX = __name__  # this module name
 _marker = object()
 
 
