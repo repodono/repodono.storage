@@ -6,6 +6,7 @@ from zope.component import getGlobalSiteManager
 from persistent.mapping import PersistentMapping
 
 from repodono.storage.annotation import factory
+from repodono.storage.annotation import to_key
 
 from plone.app.testing import PLONE_INTEGRATION_TESTING
 
@@ -132,3 +133,20 @@ class AnnotationTestCase(unittest.TestCase):
 
         # foo should not be overwritten
         self.assertEqual(value, {'foo': 'bar', 'field1': None})
+
+    def test_annotation_source_schema_violation_recovery(self):
+        Dummy3.install(self.portal)
+        annotations = IAnnotations(self.portal)
+        value = annotations['repodono.storage.tests.test_annotation.Dummy3']
+        value['field2'] = 222
+        self.assertRaises(TypeError, IDummy3, self.portal)
+
+        # can still extract with a bare alternative version that isn't
+        # registered in ZCA but references the correct call
+
+        @factory(IDummy3, to_key(__name__, 'Dummy3'))
+        class Dummy3alt(object):
+            pass
+
+        dummy = Dummy3alt(self.portal)
+        self.assertEqual(dummy.field2, 222)
