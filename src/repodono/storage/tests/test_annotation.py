@@ -14,8 +14,7 @@ import unittest
 
 class IDummy(Interface):
     field1 = schema.TextLine(title=u'field1')
-    field2 = schema.TextLine(title=u'field2')
-
+    field2 = schema.TextLine(title=u'field2', default=u'Test')
 
 @factory(IDummy)
 class Dummy(object):
@@ -29,6 +28,17 @@ class Dummy2(object):
     field1 = schema.fieldproperty.FieldProperty(IDummy2['field1'])
     field3 = schema.fieldproperty.FieldProperty(IDummy2['field3'])
 
+class IDummy3(IDummy):
+    def foo():
+        pass
+
+@factory(IDummy3)
+class Dummy3(object):
+    field2 = schema.fieldproperty.FieldProperty(IDummy3['field2'])
+
+    def foo(self):
+        pass
+
 
 class AnnotationTestCase(unittest.TestCase):
 
@@ -39,11 +49,13 @@ class AnnotationTestCase(unittest.TestCase):
         gsm = getGlobalSiteManager()
         gsm.registerAdapter(factory=Dummy)
         gsm.registerAdapter(factory=Dummy2)
+        gsm.registerAdapter(factory=Dummy3)
 
     def tearDown(self):
         gsm = getGlobalSiteManager()
         gsm.unregisterAdapter(factory=Dummy)
         gsm.unregisterAdapter(factory=Dummy2)
+        gsm.unregisterAdapter(factory=Dummy3)
 
     def test_annotation_fail(self):
         self.assertRaises(TypeError, IDummy, self.portal)
@@ -102,3 +114,21 @@ class AnnotationTestCase(unittest.TestCase):
         Dummy2.uninstall(self.portal)
         self.assertNotIn('repodono.storage.tests.test_annotation.Dummy2',
             annotations.keys())
+
+    def test_annotation_schema_ignore_methods(self):
+        Dummy3.install(self.portal)
+        annotations = IAnnotations(self.portal)
+        value = annotations['repodono.storage.tests.test_annotation.Dummy3']
+        value['foo'] = 'bar'
+        dummy = IDummy3(self.portal)
+
+        self.assertIsNone(dummy.field1)
+        self.assertEqual(dummy.field2, 'Test')
+        self.assertTrue(callable(dummy.foo))
+
+        # assign some values
+        dummy.foo = 1
+        dummy.field1 = None
+
+        # foo should not be overwritten
+        self.assertEqual(value, {'foo': 'bar', 'field1': None})

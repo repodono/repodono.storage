@@ -1,3 +1,4 @@
+from zope.interface.interface import Method
 from zope.interface import implementer
 from zope.component import adapter
 from zope.annotation.interfaces import IAnnotatable
@@ -24,6 +25,10 @@ def _teardown_dict_annotation(context, key):
     if key in annotations:
         del annotations[key]
         return True
+
+def _iface_fields(iface):
+    return [n for n, v in iface.namesAndDescriptions(all=True)
+            if not isinstance(v, Method)]
 
 def factory(iface, _key=None):
     """
@@ -59,6 +64,8 @@ def factory(iface, _key=None):
         if key is None:
             key = to_key(class_.__module__, class_.__name__)
 
+        names = _iface_fields(iface)
+
         @adapter(IAnnotatable)
         @implementer(iface)
         class Annotation(class_):
@@ -68,7 +75,7 @@ def factory(iface, _key=None):
                     raise TypeError('Could not instantiate a `%s` from %s' %
                         (key, context))
                 d = annotations[key]
-                for name in iface.names(all=True):
+                for name in names:
                     value = d.get(name, _marker)
                     if value is _marker:
                         # undefined values are not touched, only define
@@ -92,7 +99,7 @@ def factory(iface, _key=None):
                 """
 
                 super(Annotation, self).__setattr__(name, value)
-                if name not in iface.names(all=True):
+                if name not in names:
                     return
                 annotations = IAnnotations(self.context)
                 d = annotations[key]
