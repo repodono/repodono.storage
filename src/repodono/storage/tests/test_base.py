@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+from zope.annotation.interfaces import IAnnotations
+
 from repodono.storage.interfaces import IStorageInfo
-from repodono.storage.annotation import StorageInfo
+from repodono.storage.base import StorageInfo
 
 from plone.app.contenttypes.tests.robot.variables import TEST_FOLDER_ID
 
@@ -26,3 +28,6 @@ class StorageInfoTestCase(unittest.TestCase):
         StorageInfo.install(self.folder)
         storage_info = IStorageInfo(self.folder)
         self.assertIsNone(storage_info.path)
+
+        self.assertIn('repodono.storage.base.StorageInfo',
+            IAnnotations(self.folder).keys())

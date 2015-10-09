@@ -87,8 +87,3 @@ def factory(iface, _key=None):
         return type(class_.__name__, (Annotation, class_), {})
 
     return decorator
-
-
-@factory(IStorageInfo)
-class StorageInfo(object):
-    pass
