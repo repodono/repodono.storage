@@ -14,7 +14,7 @@ def to_key(prefix, name):
 
 def _setup_dict_annotation(context, key):
     annotations = IAnnotations(context)
-    if not key in annotations:
+    if key not in annotations:
         annotations[key] = PersistentMapping()
         return annotations[key]
 
@@ -71,7 +71,7 @@ def factory(iface, _key=None):
         class Annotation(class_):
             def __init__(self, context, *a, **kw):
                 annotations = IAnnotations(context)
-                if not key in annotations:
+                if key not in annotations:
                     raise TypeError('Could not instantiate a `%s` from %s '
                         'with Annotation `%s`' % (classname, context, key))
                 d = annotations[key]
