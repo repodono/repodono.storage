@@ -62,7 +62,8 @@ class AnnotationTestCase(unittest.TestCase):
         self.assertRaises(TypeError, IDummy, self.portal)
 
     def test_annotation_basic_standard_lifecycle(self):
-        Dummy.install(self.portal)
+        d = Dummy.install(self.portal)
+        self.assertTrue(isinstance(d, PersistentMapping))
         dummy = IDummy(self.portal)
         self.assertIsNone(dummy.field1)
         self.assertIsNone(dummy.field2)
@@ -73,6 +74,7 @@ class AnnotationTestCase(unittest.TestCase):
 
         value = annotations['repodono.storage.tests.test_annotation.Dummy']
         self.assertTrue(isinstance(value, PersistentMapping))
+        self.assertIs(d, value)
 
         # assign some values
         dummy.field1 = u'Test'
@@ -84,9 +86,11 @@ class AnnotationTestCase(unittest.TestCase):
         # only fields defined in the interface are persisted.
         self.assertEqual(value, {'field1': u'Test', 'field2': 1})
 
-        Dummy.uninstall(self.portal)
+        old = Dummy.uninstall(self.portal)
         self.assertNotIn('repodono.storage.tests.test_annotation.Dummy',
             annotations.keys())
+        self.assertFalse(isinstance(old, PersistentMapping))
+        self.assertEqual(old, {'field1': u'Test', 'field2': 1,})
 
     def test_annotation_schema_standard_lifecycle(self):
         Dummy2.install(self.portal)
@@ -141,7 +145,7 @@ class AnnotationTestCase(unittest.TestCase):
         value['field2'] = 222
         self.assertRaises(TypeError, IDummy3, self.portal)
 
-        # can still extract with a bare alternative version that isn't
+        # can still extract with a bare alternative class that isn't
         # registered in ZCA but references the correct call
 
         @factory(IDummy3, to_key(__name__, 'Dummy3'))

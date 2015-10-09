@@ -19,13 +19,14 @@ def _setup_dict_annotation(context, key):
     annotations = IAnnotations(context)
     if not key in annotations:
         annotations[key] = PersistentMapping()
-        return True
+        return annotations[key]
 
 def _teardown_dict_annotation(context, key):
     annotations = IAnnotations(context)
     if key in annotations:
+        result = dict(annotations[key])
         del annotations[key]
-        return True
+        return result
 
 def _iface_fields(iface):
     return [n for n, v in iface.namesAndDescriptions(all=True)
@@ -119,7 +120,7 @@ def factory(iface, _key=None):
                 context.
                 """
 
-                _setup_dict_annotation(context, key)
+                return _setup_dict_annotation(context, key)
 
             @classmethod
             def uninstall(cls, context):
@@ -127,7 +128,7 @@ def factory(iface, _key=None):
                 Completely removes the annotation from context.
                 """
 
-                _teardown_dict_annotation(context, key)
+                return _teardown_dict_annotation(context, key)
 
         return type(class_.__name__, (Annotation,), {})
 
