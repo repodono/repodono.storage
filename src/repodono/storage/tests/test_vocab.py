@@ -22,7 +22,8 @@ class StorageVocabTestCase(unittest.TestCase):
     def test_base(self):
         vocab = StorageBackendVocabFactory()(None)
         self.assertEqual(list(vocab), [])
-        vocab = queryUtility(IVocabularyFactory,
+        vocab = queryUtility(
+            IVocabularyFactory,
             name='repodono.storage.backends')(None)
         self.assertEqual(list(vocab), [])
 
@@ -30,9 +31,9 @@ class StorageVocabTestCase(unittest.TestCase):
         getSiteManager().registerUtility(
             DummyStorageBackend(), IStorageBackend, name='dummy_storage')
         vocab = StorageBackendVocabFactory()(None)
-        self.assertEqual(vocab.getTermByToken('dummy_storage').token,
-            'dummy_storage')
-        vocab = queryUtility(IVocabularyFactory,
-            name='repodono.storage.backends')(None)
-        self.assertEqual(vocab.getTermByToken('dummy_storage').token,
-            'dummy_storage')
+        self.assertEqual(vocab.getTermByToken(
+            'dummy_storage').token, 'dummy_storage')
+        vocab = queryUtility(
+            IVocabularyFactory, name='repodono.storage.backends')(None)
+        self.assertEqual(vocab.getTermByToken(
+            'dummy_storage').token, 'dummy_storage')

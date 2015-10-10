@@ -29,7 +29,7 @@ class IStorageInfo(Interface):
     path = schema.TextLine(
         title=_(u'Path'),
         description=_(u'The path argument that is required to instantiate the '
-            'backend for this context.'),
+                      'backend for this context.'),
         required=False,
     )
 

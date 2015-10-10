@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from repodono.storage.base import BaseStorageBackend
 from repodono.storage.base import BaseStorage
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from zope.interface import implementer
 
 from .annotation import factory
@@ -18,6 +19,7 @@ class BaseStorageBackend(object):
     """
     The base storage backend utility
     """
+
 
 @factory(IStorageInfo)
 class StorageInfo(object):

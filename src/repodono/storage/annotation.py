@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from zope.schema.interfaces import WrongType
 from zope.interface.interface import Method
 from zope.interface import implementer
@@ -12,11 +13,13 @@ _marker = object()
 def to_key(prefix, name):
     return prefix + '.' + name
 
+
 def _setup_dict_annotation(context, key):
     annotations = IAnnotations(context)
     if key not in annotations:
         annotations[key] = PersistentMapping()
         return annotations[key]
+
 
 def _teardown_dict_annotation(context, key):
     annotations = IAnnotations(context)
@@ -25,11 +28,13 @@ def _teardown_dict_annotation(context, key):
         del annotations[key]
         return result
 
+
 def _iface_fields(iface):
     return [n for n, v in iface.namesAndDescriptions(all=True)
             if not isinstance(v, Method)]
 
-def factory(iface, _key=None):
+
+def factory(iface, _key=None):  # add implicit flag to autoinstall?
     """
     A class decorator to a class to turn it into an annotation that
     requires an explicit installation and backed by a PersistentMapping,
@@ -72,8 +77,9 @@ def factory(iface, _key=None):
             def __init__(self, context, *a, **kw):
                 annotations = IAnnotations(context)
                 if key not in annotations:
-                    raise TypeError('Could not instantiate a `%s` from %s '
-                        'with Annotation `%s`' % (classname, context, key))
+                    raise TypeError(
+                        'Could not instantiate a `%s` from %s with Annotation '
+                        '`%s`' % (classname, context, key))
                 d = annotations[key]
                 for name in names:
                     value = d.get(name, _marker)
@@ -88,9 +94,10 @@ def factory(iface, _key=None):
                     try:
                         super(Annotation, self).__setattr__(name, d.get(name))
                     except WrongType as e:
-                        raise TypeError('Could not assign attribute `%s` to '
-                            'class `%s` with value from Annotation `%s` due '
-                            'to `%s`.' % (name, classname, key, e.__repr__()))
+                        raise TypeError(
+                            'Could not assign attribute `%s` to class `%s` '
+                            'with value from Annotation `%s` due to `%s`.' %
+                            (name, classname, key, e.__repr__()))
 
                 # finally associate context to the instance.
                 super(Annotation, self).__setattr__('context', context)

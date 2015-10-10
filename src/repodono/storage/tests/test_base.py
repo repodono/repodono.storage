@@ -29,5 +29,6 @@ class StorageInfoTestCase(unittest.TestCase):
         storage_info = IStorageInfo(self.folder)
         self.assertIsNone(storage_info.path)
 
-        self.assertIn('repodono.storage.base.StorageInfo',
+        self.assertIn(
+            'repodono.storage.base.StorageInfo',
             IAnnotations(self.folder).keys())

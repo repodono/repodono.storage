@@ -17,21 +17,26 @@ class IDummy(Interface):
     field1 = schema.TextLine(title=u'field1')
     field2 = schema.TextLine(title=u'field2', default=u'Test')
 
+
 @factory(IDummy)
 class Dummy(object):
     pass
 
+
 class IDummy2(IDummy):
     field3 = schema.Int(title=u'field3')
+
 
 @factory(IDummy2)
 class Dummy2(object):
     field1 = schema.fieldproperty.FieldProperty(IDummy2['field1'])
     field3 = schema.fieldproperty.FieldProperty(IDummy2['field3'])
 
+
 class IDummy3(IDummy):
     def foo():
         pass
+
 
 @factory(IDummy3)
 class Dummy3(object):
@@ -69,7 +74,8 @@ class AnnotationTestCase(unittest.TestCase):
         self.assertIsNone(dummy.field2)
 
         annotations = IAnnotations(self.portal)
-        self.assertIn('repodono.storage.tests.test_annotation.Dummy',
+        self.assertIn(
+            'repodono.storage.tests.test_annotation.Dummy',
             annotations.keys())
 
         value = annotations['repodono.storage.tests.test_annotation.Dummy']
@@ -87,10 +93,11 @@ class AnnotationTestCase(unittest.TestCase):
         self.assertEqual(value, {'field1': u'Test', 'field2': 1})
 
         old = Dummy.uninstall(self.portal)
-        self.assertNotIn('repodono.storage.tests.test_annotation.Dummy',
+        self.assertNotIn(
+            'repodono.storage.tests.test_annotation.Dummy',
             annotations.keys())
         self.assertFalse(isinstance(old, PersistentMapping))
-        self.assertEqual(old, {'field1': u'Test', 'field2': 1,})
+        self.assertEqual(old, {'field1': u'Test', 'field2': 1})
 
     def test_annotation_schema_standard_lifecycle(self):
         Dummy2.install(self.portal)
@@ -101,9 +108,11 @@ class AnnotationTestCase(unittest.TestCase):
         self.assertIsNone(dummy.field3)
 
         # standard schema validation kicks in
-        self.assertRaises(schema.interfaces.RequiredMissing,
+        self.assertRaises(
+            schema.interfaces.RequiredMissing,
             setattr, dummy, 'field1', None)
-        self.assertRaises(schema.interfaces.WrongType,
+        self.assertRaises(
+            schema.interfaces.WrongType,
             setattr, dummy, 'field3', u'test')
 
         # assign some values
@@ -113,11 +122,12 @@ class AnnotationTestCase(unittest.TestCase):
 
         annotations = IAnnotations(self.portal)
         value = annotations['repodono.storage.tests.test_annotation.Dummy2']
-        self.assertEqual(value,
-            {'field1': u'Test', 'field2': u'Value', 'field3': 1})
+        self.assertEqual(
+            value, {'field1': u'Test', 'field2': u'Value', 'field3': 1})
 
         Dummy2.uninstall(self.portal)
-        self.assertNotIn('repodono.storage.tests.test_annotation.Dummy2',
+        self.assertNotIn(
+            'repodono.storage.tests.test_annotation.Dummy2',
             annotations.keys())
 
     def test_annotation_schema_ignore_methods(self):
