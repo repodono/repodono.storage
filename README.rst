@@ -4,6 +4,11 @@ repodono.storage
 
 Core storage behavior module for the repodono project.
 
+.. image:: https://travis-ci.org/repodono/repodono.storage.svg?branch=master
+  :target: https://travis-ci.org/repodono/repodono.storage
+.. image:: https://coveralls.io/repos/repodono/repodono.storage/badge.svg?branch=master&service=github
+  :target: https://coveralls.io/github/repodono/repodono.storage?branch=master
+
 Features
 --------
 
