@@ -66,6 +66,11 @@ class AnnotationTestCase(unittest.TestCase):
     def test_annotation_fail(self):
         self.assertRaises(TypeError, IDummy, self.portal)
 
+    def test_annotation_classdef(self):
+        self.assertEqual(Dummy.__name__, 'Dummy')
+        self.assertEqual(
+            Dummy.__module__, 'repodono.storage.tests.test_annotation')
+
     def test_annotation_basic_standard_lifecycle(self):
         d = Dummy.install(self.portal)
         self.assertTrue(isinstance(d, PersistentMapping))

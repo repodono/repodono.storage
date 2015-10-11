@@ -134,6 +134,7 @@ def factory(iface, _key=None):  # add implicit flag to autoinstall?
 
                 return _teardown_dict_annotation(context, key)
 
-        return type(class_.__name__, (Annotation,), {})
+        return type(class_.__name__, (Annotation,), {
+            '__module__': class_.__module__})
 
     return decorator
