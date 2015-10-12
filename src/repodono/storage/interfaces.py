@@ -12,11 +12,10 @@ class IRepodonoStorageLayer(IDefaultBrowserLayer):
     """Marker interface that defines a browser layer."""
 
 
-class IStorageInfo(Interface):
+class IBaseStorageInfo(Interface):
     """
-    These are the bare minimum, generic attributes required to get a
-    backend instantiated.  All of these are associated with a given
-    context, can be done via IAnnotation or some other means.
+    The base storage info interface.  Every single storage info must
+    inherit from this.
     """
 
     backend = schema.Choice(
@@ -26,10 +25,19 @@ class IStorageInfo(Interface):
         vocabulary='repodono.storage.backend',
     )
 
+
+class IStorageInfo(IBaseStorageInfo):
+    """
+    These are the bare minimum, generic attributes required to get a
+    backend instantiated.  All of these are associated with a given
+    context, can be done via IAnnotation or some other means.
+    """
+
     path = schema.TextLine(
         title=_(u'Path'),
         description=_(u'The path argument that is required to instantiate the '
-                      'backend for this context.'),
+                      'backend for this context.  The format of the path is '
+                      'backend specific.'),
         required=False,
     )
 
