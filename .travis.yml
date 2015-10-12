@@ -9,7 +9,7 @@ script:
   - bin/code-analysis
   - bin/coverage run --source=src bin/test
 after_success:
-  - pip install coveralls
+  - pip install -q coveralls==0.5
   - coveralls
 
 notifications:
