@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from zope.interface import implementer
 
-from .annotation import factory
+from .annotation import annotator
 from .interfaces import IStorage
 from .interfaces import IStorageBackend
 from .interfaces import IStorageInfo
@@ -21,6 +21,6 @@ class BaseStorageBackend(object):
     """
 
 
-@factory(IStorageInfo)
+@annotator(IStorageInfo)
 class StorageInfo(object):
     pass

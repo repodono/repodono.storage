@@ -5,7 +5,7 @@ from zope.annotation.interfaces import IAnnotations
 from zope.component import getGlobalSiteManager
 from persistent.mapping import PersistentMapping
 
-from repodono.storage.annotation import factory
+from repodono.storage.annotation import annotator
 from repodono.storage.annotation import to_key
 
 from plone.app.testing import PLONE_INTEGRATION_TESTING
@@ -18,7 +18,7 @@ class IDummy(Interface):
     field2 = schema.TextLine(title=u'field2', default=u'Test')
 
 
-@factory(IDummy)
+@annotator(IDummy)
 class Dummy(object):
     pass
 
@@ -27,7 +27,7 @@ class IDummy2(IDummy):
     field3 = schema.Int(title=u'field3')
 
 
-@factory(IDummy2)
+@annotator(IDummy2)
 class Dummy2(object):
     field1 = schema.fieldproperty.FieldProperty(IDummy2['field1'])
     field3 = schema.fieldproperty.FieldProperty(IDummy2['field3'])
@@ -38,7 +38,7 @@ class IDummy3(IDummy):
         pass
 
 
-@factory(IDummy3)
+@annotator(IDummy3)
 class Dummy3(object):
     field2 = schema.fieldproperty.FieldProperty(IDummy3['field2'])
 
@@ -163,7 +163,7 @@ class AnnotationTestCase(unittest.TestCase):
         # can still extract with a bare alternative class that isn't
         # registered in ZCA but references the correct call
 
-        @factory(IDummy3, to_key(__name__, 'Dummy3'))
+        @annotator(IDummy3, to_key(__name__, 'Dummy3'))
         class Dummy3alt(object):
             pass
 

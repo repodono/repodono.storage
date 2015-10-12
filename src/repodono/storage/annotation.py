@@ -34,7 +34,7 @@ def _iface_fields(iface):
             if not isinstance(v, Method)]
 
 
-def factory(iface, _key=None):  # add implicit flag to autoinstall?
+def annotator(iface, _key=None):  # add implicit flag to autoinstall?
     """
     A class decorator to a class to turn it into an annotation that
     requires an explicit installation and backed by a PersistentMapping,
