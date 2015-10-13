@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<ex xmlns="http://ns.example.com/">
+  <node>Some file</node>
+</ex>
