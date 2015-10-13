@@ -89,9 +89,77 @@ class IStorage(Interface):
     Common storage class used by the workspace implementation.
     """
 
+    def checkout(rev=None):
+        """
+        Activate the revision identify by the rev.  All file operations
+        will now be done against it.
+
+        Default argument of None checks out a default version specific
+        to the storage backend, in most cases it will be the latest
+        revision.
+        """
+
+    def file(path):
+        """
+        Returns the content at the given path, for the currently
+        checked out revision.
+        """
+
+    def files():
+        """
+        Returns the entire listing of all files in the currently
+        checked out revision.
+        """
+
+    def listdir(path):
+        """
+        Do a directory listing of `path` in the currently checked out
+        revision.
+        """
+
+    def log(start, count, branch=None):
+        """
+        Returns a list of log entries.
+        """
+
+    def pathinfo(path):
+        """
+        Returns the information at the given path, for the currently
+        checked out revision.
+        """
+
 
 class IStorageBackend(Interface):
     """
     The utility that instantiates and manages the storage instances.
     There is an implementation per storage type.
     """
+
+    title = schema.TextLine(
+        title=_(u'Title'),
+        description=_(u'Human readable title to this storage backend'),
+    )
+
+    command = schema.TextLine(
+        title=_(u'Command'),
+        default=_(u'The name of the binary that is typically associated with '
+                  'this storage backend.'),
+        required=False,
+    )
+
+    clone_verb = schema.TextLine(
+        title=_(u'Clone Verb'),
+        default=_(u'The command "verb" that the default binary use for making '
+                  'a local checkout on user\'s machine.'),
+        required=False,
+    )
+
+    def adapt_from(context):
+        """
+        Adapt context into a storage instance.
+        """
+
+    def create(context):
+        """
+        Create or instantiate the backend storage for context.
+        """
