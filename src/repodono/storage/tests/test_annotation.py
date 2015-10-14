@@ -135,6 +135,16 @@ class AnnotationTestCase(unittest.TestCase):
             'repodono.storage.tests.test_annotation.Dummy2',
             annotations.keys())
 
+    def test_annotation_schema_install_alt_mod_dict(self):
+        # Alternative modification method after post-install.
+        # This can violate schema.
+        d = Dummy2.install(self.portal)
+        d['field1'] = u'Test'
+        d['field3'] = 2
+        dummy = IDummy2(self.portal)
+        self.assertEqual(dummy.field1, u'Test')
+        self.assertEqual(dummy.field3, 2)
+
     def test_annotation_schema_ignore_methods(self):
         Dummy3.install(self.portal)
         annotations = IAnnotations(self.portal)
