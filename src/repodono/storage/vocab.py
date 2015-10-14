@@ -18,6 +18,6 @@ class StorageBackendVocabFactory(object):
         for name, utility in getUtilitiesFor(IStorageBackend):
             # TODO define standard i18n the title for implementations
             title = name
-            terms.append(SimpleVocabulary.createTerm(utility, name, title))
+            terms.append(SimpleVocabulary.createTerm(name, name, title))
 
         return SimpleVocabulary(terms)

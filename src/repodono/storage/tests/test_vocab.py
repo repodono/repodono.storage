@@ -33,7 +33,11 @@ class StorageVocabTestCase(unittest.TestCase):
         vocab = StorageBackendVocabFactory()(None)
         self.assertEqual(vocab.getTermByToken(
             'dummy_storage').token, 'dummy_storage')
+        self.assertEqual(vocab.getTermByToken(
+            'dummy_storage').value, 'dummy_storage')
         vocab = queryUtility(
             IVocabularyFactory, name='repodono.storage.backends')(None)
         self.assertEqual(vocab.getTermByToken(
             'dummy_storage').token, 'dummy_storage')
+        self.assertEqual(vocab.getTermByToken(
+            'dummy_storage').value, 'dummy_storage')
