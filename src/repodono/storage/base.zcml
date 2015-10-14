@@ -2,6 +2,12 @@
     xmlns="http://namespaces.zope.org/zope"
     i18n_domain="repodono.storage">
 
+  <utility
+      provides="repodono.storage.interfaces.IStorageInstaller"
+      component="repodono.storage.base.storage_installer"
+      />
+
   <adapter factory="repodono.storage.base.StorageInfo" />
+  <adapter factory="repodono.storage.base.StorageFactory" />
 
 </configure>

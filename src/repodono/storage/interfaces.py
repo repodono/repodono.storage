@@ -12,25 +12,10 @@ class IRepodonoStorageLayer(IDefaultBrowserLayer):
     """Marker interface that defines a browser layer."""
 
 
-class IBaseStorageInfo(Interface):
+class IStorageInfo(Interface):
     """
-    The base storage info interface.  Every single storage info must
-    inherit from this.
-    """
-
-    backend = schema.Choice(
-        title=_(u'Backend'),
-        description=_(u'The identifier for the backend.'),
-        required=True,
-        vocabulary='repodono.storage.backend',
-    )
-
-
-class IStorageInfo(IBaseStorageInfo):
-    """
-    These are the bare minimum, generic attributes required to get a
-    backend instantiated.  All of these are associated with a given
-    context, can be done via IAnnotation or some other means.
+    A common minimum set of information required to acquire a storage
+    instance
     """
 
     path = schema.TextLine(
@@ -48,6 +33,8 @@ class IStorageFactory(Interface):
     of its instantiation, which can then be called again to instantiate
     the IStorage instance, specific to the information in the attributes
     captured by IStorageInfo.
+
+    By default this is implemented as an annotation.
 
     With ``context`` as a Dexterity item, the verbose instantiation can
     be done like so::
@@ -71,6 +58,13 @@ class IStorageFactory(Interface):
     The minimum implementation should be a generic class to ensure
     reusability by the users of this framework.
     """
+
+    backend = schema.Choice(
+        title=_(u'Backend'),
+        description=_(u'The identifier for the backend.'),
+        required=True,
+        vocabulary='repodono.storage.backends',
+    )
 
     def get_storage():
         """
@@ -154,12 +148,19 @@ class IStorageBackend(Interface):
         required=False,
     )
 
-    def adapt_from(context):
+    def acquire(context):
         """
-        Adapt context into a storage instance.
+        Acquire a storage instance of this backend from context.
         """
 
-    def create(context):
+    def install(context):
         """
-        Create or instantiate the backend storage for context.
+        Create or instantiate the storage this backend provides for
+        context.
         """
+
+
+class IStorageInstaller(Interface):
+    """
+    Marker interface for storage installer utility.
+    """

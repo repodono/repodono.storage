@@ -44,3 +44,36 @@ REPODONO_STORAGE_ACCEPTANCE_TESTING = FunctionalTesting(
     ),
     name='RepodonoStorageLayer:AcceptanceTesting'
 )
+
+
+class RepodonoDummyStorageLayer(PloneSandboxLayer):
+
+    defaultBases = (REPODONO_STORAGE_FIXTURE,)
+
+    def setUpZope(self, app, configurationContext):
+        self.loadZCML('testing.zcml', package=repodono.storage.testing)
+
+
+REPODONO_DUMMY_STORAGE_FIXTURE = RepodonoDummyStorageLayer()
+
+
+REPODONO_DUMMY_STORAGE_INTEGRATION_TESTING = IntegrationTesting(
+    bases=(REPODONO_DUMMY_STORAGE_FIXTURE,),
+    name='RepodonoDummyStorageLayer:IntegrationTesting'
+)
+
+
+REPODONO_DUMMY_STORAGE_FUNCTIONAL_TESTING = FunctionalTesting(
+    bases=(REPODONO_DUMMY_STORAGE_FIXTURE,),
+    name='RepodonoDummyStorageLayer:FunctionalTesting'
+)
+
+
+REPODONO_DUMMY_STORAGE_ACCEPTANCE_TESTING = FunctionalTesting(
+    bases=(
+        REPODONO_DUMMY_STORAGE_FIXTURE,
+        REMOTE_LIBRARY_BUNDLE_FIXTURE,
+        z2.ZSERVER_FIXTURE
+    ),
+    name='RepodonoDummyStorageLayer:AcceptanceTesting'
+)
