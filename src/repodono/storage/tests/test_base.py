@@ -3,6 +3,7 @@ from zope.annotation.interfaces import IAnnotations
 
 from repodono.storage.interfaces import IStorageInfo
 from repodono.storage.base import StorageInfo
+from repodono.storage.base import BaseStorageBackend
 
 from plone.app.contenttypes.tests.robot.variables import TEST_FOLDER_ID
 
@@ -18,6 +19,12 @@ class StorageInfoTestCase(unittest.TestCase):
     def setUp(self):
         self.portal = self.layer['portal']
         self.folder = self.portal.get(TEST_FOLDER_ID)
+
+    def test_default_impl(self):
+        # default data, no annotation
+        backend = BaseStorageBackend()
+        self.assertRaises(NotImplementedError, backend.acquire, None)
+        self.assertRaises(NotImplementedError, backend.install, None)
 
     def test_storage_info_annotation_fail(self):
         # default data, no annotation

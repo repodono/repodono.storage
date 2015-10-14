@@ -3,10 +3,11 @@ from zope.component import getUtility
 
 from repodono.storage.interfaces import IStorage
 from repodono.storage.interfaces import IStorageFactory
+from repodono.storage.interfaces import IStorageBackend
 from repodono.storage.interfaces import IStorageInstaller
 
 from repodono.storage.testing import REPODONO_DUMMY_STORAGE_INTEGRATION_TESTING
-# from repodono.storage.testing.storage import DummyStorage
+from repodono.storage.testing.storage import DummyStorage
 
 import unittest
 
@@ -28,7 +29,9 @@ class DummyStorageTestCase(unittest.TestCase):
         sf = IStorageFactory(self.portal)
         self.assertEqual(sf.backend, u'dummy_backend')
 
-        # acquire storage
-        # storage = storage_backend.acquire(self.portal)
-        # storage = IStorage(self.portal)
-        # self.assertTrue(isinstance(storage, DummyStorage))
+        storage_backend = getUtility(IStorageBackend, name=u'dummy_backend')
+        storage = storage_backend.acquire(self.portal)
+        self.assertTrue(isinstance(storage, DummyStorage))
+
+        storage = IStorage(self.portal)
+        self.assertTrue(isinstance(storage, DummyStorage))

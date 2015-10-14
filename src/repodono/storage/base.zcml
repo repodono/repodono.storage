@@ -10,4 +10,15 @@
   <adapter factory="repodono.storage.base.StorageInfo" />
   <adapter factory="repodono.storage.base.StorageFactory" />
 
+  <!--
+    This is probably too general, might need more specific interface
+    than IAnnotatable
+  -->
+
+  <adapter
+      for="zope.annotation.interfaces.IAnnotatable"
+      provides="repodono.storage.interfaces.IStorage"
+      factory="repodono.storage.base.storage_adapter"
+      />
+
 </configure>

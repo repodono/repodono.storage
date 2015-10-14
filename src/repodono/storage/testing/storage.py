@@ -13,7 +13,12 @@ class IDummyStorageInfo(IStorageInfo):
 
 
 class DummyStorageBackend(BaseStorageBackend):
-    pass
+
+    def acquire(self, context):
+        return DummyStorage(context)
+
+    def install(self, context):
+        pass
 
 
 class DummyStorage(BaseStorage):

@@ -24,10 +24,10 @@ class BaseStorageBackend(object):
     """
 
     def acquire(self, context):
-        pass
+        raise NotImplementedError
 
     def install(self, context):
-        pass
+        raise NotImplementedError
 
 
 @annotator(IStorageFactory)
@@ -69,3 +69,7 @@ def storage_installer(context, backend):
     # Now get the backend utility and install that into context.
     backend_utility = getUtility(IStorageBackend, name=backend)
     backend_utility.install(context)
+
+
+def storage_adapter(context):
+    return IStorageFactory(context).get_storage()
