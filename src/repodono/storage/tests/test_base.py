@@ -2,7 +2,6 @@
 from zope.annotation.interfaces import IAnnotations
 
 from repodono.storage.interfaces import IStorageInfo
-from repodono.storage.base import StorageInfo
 from repodono.storage.base import BaseStorageBackend
 
 from plone.app.contenttypes.tests.robot.variables import TEST_FOLDER_ID
