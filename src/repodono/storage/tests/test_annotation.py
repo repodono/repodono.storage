@@ -101,7 +101,7 @@ class AnnotationTestCase(unittest.TestCase):
         # only fields defined in the interface are persisted.
         self.assertEqual(value, {'field1': u'Test', 'field2': 1})
 
-        old = Dummy.uninstall(self.portal)
+        old = dummy.uninstall()
         self.assertNotIn(
             'repodono.storage.tests.test_annotation.Dummy',
             annotations.keys())
@@ -166,7 +166,7 @@ class AnnotationTestCase(unittest.TestCase):
         self.assertEqual(
             value, {'field1': u'Test', 'field2': u'Value', 'field3': 1})
 
-        Dummy2.uninstall(self.portal)
+        dummy.uninstall()
         self.assertNotIn(
             'repodono.storage.tests.test_annotation.Dummy2',
             annotations.keys())
