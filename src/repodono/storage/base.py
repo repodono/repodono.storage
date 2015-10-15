@@ -61,6 +61,7 @@ def storage_installer(context, backend):
         The name of the storage backend.
     """
 
+    # TODO explore usage of marker interface instead.
     # Initialize a storage factory for the context
     storage_factory = IStorageFactory(context)
     storage_factory.backend = backend

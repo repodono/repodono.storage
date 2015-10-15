@@ -122,6 +122,9 @@ def annotator(iface, _key=None):  # add implicit flag to autoinstall?
                 d = _setup_dict_annotation(self.context, key)
                 d[name] = value
 
+            # TODO make the removal feature not an instance method
+            # within every class?
+
             def uninstall(self):
                 """
                 Completely removes the annotation from context.
