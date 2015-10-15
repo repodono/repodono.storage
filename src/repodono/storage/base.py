@@ -62,8 +62,7 @@ def storage_installer(context, backend):
     """
 
     # Initialize a storage factory for the context
-    StorageFactory.install(context)
-    storage_factory = StorageFactory(context)
+    storage_factory = IStorageFactory(context)
     storage_factory.backend = backend
 
     # Now get the backend utility and install that into context.

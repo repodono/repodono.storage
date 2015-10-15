@@ -26,15 +26,11 @@ class StorageInfoTestCase(unittest.TestCase):
         self.assertRaises(NotImplementedError, backend.acquire, None)
         self.assertRaises(NotImplementedError, backend.install, None)
 
-    def test_storage_info_annotation_fail(self):
-        # default data, no annotation
-        self.assertRaises(TypeError, IStorageInfo, self.folder)
-
     def test_storage_info_annotation_success(self):
         # default data, no annotation
-        StorageInfo.install(self.folder)
         storage_info = IStorageInfo(self.folder)
         self.assertIsNone(storage_info.path)
+        storage_info.path = u'Some Path'
 
         self.assertIn(
             'repodono.storage.base.StorageInfo',
