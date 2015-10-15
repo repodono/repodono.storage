@@ -18,7 +18,7 @@ def _setup_dict_annotation(context, key):
     annotations = IAnnotations(context)
     if key not in annotations:
         annotations[key] = PersistentMapping()
-        return annotations[key]
+    return annotations[key]
 
 
 def _teardown_dict_annotation(context, key):
@@ -76,17 +76,21 @@ def annotator(iface, _key=None):  # add implicit flag to autoinstall?
         class Annotation(class_):
             def __init__(self, context, *a, **kw):
                 annotations = IAnnotations(context)
-                if key not in annotations:
+                d = annotations.get(key, _marker)
+
+                if d is _marker:
+                    d = {}  # to let the loading routine work.
+                elif not isinstance(d, PersistentMapping):
                     raise TypeError(
                         'Could not instantiate a `%s` from %s with Annotation '
-                        '`%s`' % (classname, context, key))
-                d = annotations[key]
+                        '`%s` as it is not of type PersistentMapping' % (
+                            classname, context, key))
+
                 for name in names:
                     value = d.get(name, _marker)
                     if value is _marker:
-                        # undefined values are not touched, only define
-                        # the attribute on the instance if it doesn't
-                        # already exist
+                        # if instance already has this attribute defined,
+                        # do nothing.
                         if hasattr(self, name):
                             continue
 
@@ -111,20 +115,12 @@ def annotator(iface, _key=None):  # add implicit flag to autoinstall?
                 """
 
                 super(Annotation, self).__setattr__(name, value)
+
                 if name not in names:
                     return
-                annotations = IAnnotations(self.context)
-                d = annotations[key]
+
+                d = _setup_dict_annotation(self.context, key)
                 d[name] = value
-
-            @classmethod
-            def install(cls, context):
-                """
-                Setup a persistent dictionary as an annotation to the
-                context.
-                """
-
-                return _setup_dict_annotation(context, key)
 
             @classmethod
             def uninstall(cls, context):
