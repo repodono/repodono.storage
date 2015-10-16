@@ -105,7 +105,7 @@ def annotator(iface, _key=None):
                 # finally associate context to the instance.
                 super(Annotation, self).__setattr__('context', context)
 
-                super(class_, self).__init__(*a, **kw)
+                super(Annotation, self).__init__(*a, **kw)
 
             def __setattr__(self, name, value):
                 """

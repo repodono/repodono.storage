@@ -2,7 +2,10 @@
 from zope.interface import Interface
 from zope import schema
 from zope.annotation.interfaces import IAnnotations
+from zope.annotation.interfaces import IAnnotatable
 from zope.component import getGlobalSiteManager
+from zope.component import adapter
+from zope.component import getMultiAdapter
 from persistent.mapping import PersistentMapping
 
 from repodono.storage.annotation import annotator
@@ -55,6 +58,39 @@ class Dummy4(object):
     readonly = schema.fieldproperty.FieldProperty(IDummy4['readonly'])
 
 
+class IDummy5(IDummy, IDummy4):
+    pass
+
+
+class Dummy5Base(object):
+    def __init__(self):
+        self.base = "This is a base dummy class"
+
+
+@annotator(IDummy5)
+class Dummy5Init1(Dummy5Base):
+
+    def __init__(self):
+        # This will not work because the class annotations can mess with
+        # inheritance and this particular one __really__ mess everything
+        # up.  If the following super call is needed, the first argument
+        # must be the class before it got decorated with.
+
+        # super(Dummy5Init1, self).__init__()
+
+        # So, do this instead.
+        Dummy5Base.__init__(self)
+        self.calc = "Some calculated value"
+
+
+@adapter(IAnnotatable, Interface, Interface)
+@annotator(IDummy5)
+class Dummy5Init2(Dummy5Base):
+    def __init__(self, arg1, arg2):
+        Dummy5Base.__init__(self)
+        self.calc = arg1 + arg2
+
+
 class AnnotationTestCase(unittest.TestCase):
 
     layer = PLONE_INTEGRATION_TESTING
@@ -66,6 +102,8 @@ class AnnotationTestCase(unittest.TestCase):
         gsm.registerAdapter(factory=Dummy2)
         gsm.registerAdapter(factory=Dummy3)
         gsm.registerAdapter(factory=Dummy4)
+        gsm.registerAdapter(factory=Dummy5Init1)
+        gsm.registerAdapter(factory=Dummy5Init2)
 
     def tearDown(self):
         gsm = getGlobalSiteManager()
@@ -73,6 +111,8 @@ class AnnotationTestCase(unittest.TestCase):
         gsm.unregisterAdapter(factory=Dummy2)
         gsm.unregisterAdapter(factory=Dummy3)
         gsm.unregisterAdapter(factory=Dummy4)
+        gsm.unregisterAdapter(factory=Dummy5Init1)
+        gsm.unregisterAdapter(factory=Dummy5Init2)
 
     def test_annotation_fail(self):
         # Fail on mismatched type in annotation.
@@ -256,3 +296,31 @@ class AnnotationTestCase(unittest.TestCase):
         value['readonly'] = u'Forced manipulation'
         dummy = IDummy4(self.portal)
         self.assertEqual(dummy.readonly, u'Forced manipulation')
+
+    def test_annotation_init_method_standard(self):
+        dummy = IDummy5(self.portal)
+        # Initial assignment should work
+        self.assertEqual(dummy.calc, "Some calculated value")
+        self.assertEqual(dummy.base, "This is a base dummy class")
+
+    def test_annotation_init_method_standard_multi_arg(self):
+        # TODO add following to documentation to usage
+
+        # Note how the __init__ method in the concrete implementation
+        # above (in class Dummy5Init2) the arguments do not contain a
+        # context, but this accepts it.  Reason is how the decorator
+        # injected that argument into the method then consume it at the
+        # end before passing it back to the decoratee class's __init__
+        # method.  However note that super().__init__ cannot be called
+        # for multiple reasons, including the mismatch of arguments.
+        # This may be fixed later, but for now accept the weirdness in
+        # the number of arguments.
+
+        dummy = Dummy5Init2(self.portal, 'testv1', 'testv2')
+        self.assertEqual(dummy.calc, "testv1testv2")
+        self.assertEqual(dummy.base, "This is a base dummy class")
+
+        # Should work through ZCA.
+        dummy = getMultiAdapter((self.portal, 'testv1', 'testv2'), IDummy5)
+        self.assertEqual(dummy.calc, "testv1testv2")
+        self.assertEqual(dummy.base, "This is a base dummy class")
