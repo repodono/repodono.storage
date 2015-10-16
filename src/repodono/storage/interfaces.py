@@ -36,22 +36,20 @@ class IStorageFactory(Interface):
 
     By default this is implemented as an annotation.
 
-    With ``context`` as a Dexterity item, the verbose instantiation can
-    be done like so::
+    With ``context`` as some IAnnotatable, the verbose instantiation is
+    done like so::
 
-        >>> storage_info = IStorageInfo(context)
-        >>> backend = getUtility(IStorageBackend, name=storage_info.backend)
-        >>> storage = backend(storage_info)  # for the rest of the arguments.
+        >>> storage_factory = IStorageFactory(context)
+        >>> backend = getUtility(IStorageBackend, name=storage_factory.backend)
+        >>> storage = backend.acquire(context)
 
-    The storage factory simply encapsulates the first two lines to
-    produce storage instances.  Reason for multiple instances to a given
-    context is implementation specific but should be supported here.
-    Example::
+    For simplicity, the method ``get_storage`` simply encapsulates the
+    above, and this should simply be callable::
 
         >>> storage_factory = IStorageFactory(context)
         >>> storage = storage_factory()
 
-    Ultimately, this should be contracted to::
+    Ultimately, this can be contracted to::
 
         >>> storage = IStorage(context)
 

@@ -45,6 +45,9 @@ class StorageFactory(object):
     def get_storage_backend(self):
         return getUtility(IStorageBackend, name=self.backend)
 
+    def __call__(self):
+        return self.get_storage()
+
 
 @annotator(IStorageInfo)
 class StorageInfo(object):
@@ -72,4 +75,4 @@ def storage_installer(context, backend):
 
 
 def storage_adapter(context):
-    return IStorageFactory(context).get_storage()
+    return IStorageFactory(context)()
