@@ -34,17 +34,19 @@ def _iface_fields(iface):
             if not isinstance(v, Method)]
 
 
-def annotator(iface, _key=None):  # add implicit flag to autoinstall?
+def annotator(iface, _key=None):
     """
     A class decorator to a class to turn it into an annotation that
-    requires an explicit installation and backed by a PersistentMapping,
-    instead of the usual implicit method that has the potential to leave
-    behind stale objects to classes that may no longer exist.
+    appends a new ``PersistentMapping`` within the annotatable only when
+    an attribute is assigned for the first time, i.e. no automatic
+    writes on initial adaptation from context.
 
-    This works like a factory that will take a class and an interface,
-    returning a new class that implements the interface.  This new class
-    is able to adapt any IAnnotatable, provided that the context was
-    previously installed with the classmethod ``install``.
+    This works like a factory that will first take an interface, which
+    it will then be the implementer interface for the class which this
+    decorates.  This new class is able to adapt any IAnnotatable to
+    return an object that behaves exactly like the initial class, with
+    the attributes presented in the interface be automatically stored
+    into the underlying mapping without the entire class construct.
 
     An ``uninstall`` classmethod is also provided which will remove the
     PersistentMapping identified by key.
@@ -53,9 +55,6 @@ def annotator(iface, _key=None):  # add implicit flag to autoinstall?
     are based on the interface schema that is about to be implemented by
     this.
     """
-
-    # need the key argument but not the iface is due to python being
-    # python
 
     def decorator(class_):
         # Can't reassign the argument defined in the decorator factory
