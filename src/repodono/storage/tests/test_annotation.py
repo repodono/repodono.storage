@@ -66,11 +66,20 @@ class Dummy5Base(object):
     def __init__(self):
         self.base = "This is a base dummy class"
 
+    def foo(self, v):
+        return '(%s)' % v
+
+    def super_foo(self, v):
+        # for implementation of extension via super.
+        return self.foo(v)
+
 
 @annotator(IDummy5)
 class Dummy5Init1(Dummy5Base):
 
     def __init__(self):
+        # TODO put the following in documentation for usage of this
+
         # This will not work because the class annotations can mess with
         # inheritance and this particular one __really__ mess everything
         # up.  If the following super call is needed, the first argument
@@ -81,6 +90,14 @@ class Dummy5Init1(Dummy5Base):
         # So, do this instead.
         Dummy5Base.__init__(self)
         self.calc = "Some calculated value"
+
+    def foo(self, v):
+        result = Dummy5Base.foo(self, v)
+        return '<%s>' % result
+
+    def super_foo(self, v):
+        result = super(Dummy5Init1, self).super_foo(v)
+        return '<%s>' % result
 
 
 @adapter(IAnnotatable, Interface, Interface)
@@ -302,6 +319,19 @@ class AnnotationTestCase(unittest.TestCase):
         # Initial assignment should work
         self.assertEqual(dummy.calc, "Some calculated value")
         self.assertEqual(dummy.base, "This is a base dummy class")
+
+        # ordinary methods that do not call super should work.
+        self.assertEqual(dummy.foo('o_o'), "<(o_o)>")
+
+        # with super, since the inheritance has been flipped upside down
+        # and the referecences to the identifier is scoped globally it
+        # means only the decorated class will be referenced instead of
+        # the initial decoratee class.  This will then happen.
+
+        with self.assertRaises(RuntimeError) as cm:
+            dummy.super_foo('x_x')
+        self.assertEqual(cm.exception.args, (
+            'maximum recursion depth exceeded while calling a Python object',))
 
     def test_annotation_init_method_standard_multi_arg(self):
         # TODO add following to documentation to usage
