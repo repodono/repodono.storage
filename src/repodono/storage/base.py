@@ -38,6 +38,10 @@ class StorageFactory(object):
 
     backend = FieldProperty(IStorageFactory['backend'])
 
+    def install_storage(self):
+        backend = self.get_storage_backend()
+        backend.install(self.context)
+
     def get_storage(self):
         backend = self.get_storage_backend()
         return backend.acquire(self.context)
@@ -64,14 +68,12 @@ def storage_installer(context, backend):
         The name of the storage backend.
     """
 
+    # Initialize a storage factory for the context and assign a backend,
+    # which must be valid (checking done via vocabulary schema).
     # TODO explore usage of marker interface instead.
-    # Initialize a storage factory for the context
     storage_factory = IStorageFactory(context)
     storage_factory.backend = backend
-
-    # Now get the backend utility and install that into context.
-    backend_utility = getUtility(IStorageBackend, name=backend)
-    backend_utility.install(context)
+    storage_factory.install_storage()
 
 
 def storage_adapter(context):

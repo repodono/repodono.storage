@@ -64,6 +64,11 @@ class IStorageFactory(Interface):
         vocabulary='repodono.storage.backends',
     )
 
+    def install_storage():
+        """
+        Install a new storage instance and associate it with context.
+        """
+
     def get_storage():
         """
         Return the storage instance as defined with the information
