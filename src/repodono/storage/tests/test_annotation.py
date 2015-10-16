@@ -46,6 +46,15 @@ class Dummy3(object):
         pass
 
 
+class IDummy4(Interface):
+    readonly = schema.TextLine(title=u'Read Only Text', readonly=True)
+
+
+@annotator(IDummy4)
+class Dummy4(object):
+    readonly = schema.fieldproperty.FieldProperty(IDummy4['readonly'])
+
+
 class AnnotationTestCase(unittest.TestCase):
 
     layer = PLONE_INTEGRATION_TESTING
@@ -56,12 +65,14 @@ class AnnotationTestCase(unittest.TestCase):
         gsm.registerAdapter(factory=Dummy)
         gsm.registerAdapter(factory=Dummy2)
         gsm.registerAdapter(factory=Dummy3)
+        gsm.registerAdapter(factory=Dummy4)
 
     def tearDown(self):
         gsm = getGlobalSiteManager()
         gsm.unregisterAdapter(factory=Dummy)
         gsm.unregisterAdapter(factory=Dummy2)
         gsm.unregisterAdapter(factory=Dummy3)
+        gsm.unregisterAdapter(factory=Dummy4)
 
     def test_annotation_fail(self):
         # Fail on mismatched type in annotation.
@@ -225,3 +236,23 @@ class AnnotationTestCase(unittest.TestCase):
 
         dummy = Dummy3alt(self.portal)
         self.assertEqual(dummy.field2, 222)
+
+    def test_annotation_readonly_fields(self):
+        dummy = IDummy4(self.portal)
+        # Initial assignment should work
+        dummy.readonly = u'Value to be frozen.'
+
+        with self.assertRaises(ValueError) as cm:
+            dummy.readonly = u"Can't assign this"
+
+        self.assertEqual(cm.exception.args, ('readonly', 'field is readonly'))
+
+        # underlying mapping is not manipulated beyond that.
+        annotations = IAnnotations(self.portal)
+        value = annotations['repodono.storage.tests.test_annotation.Dummy4']
+        self.assertEqual(value['readonly'], u'Value to be frozen.')
+
+        # forced manipulation
+        value['readonly'] = u'Forced manipulation'
+        dummy = IDummy4(self.portal)
+        self.assertEqual(dummy.readonly, u'Forced manipulation')
