@@ -12,6 +12,10 @@ class IRepodonoStorageLayer(IDefaultBrowserLayer):
     """Marker interface that defines a browser layer."""
 
 
+class IStorageEnabled(Interface):
+    """Marker interface for objects to enable the usage of Storage."""
+
+
 class IStorageInfo(Interface):
     """
     A common minimum set of information required to acquire a storage

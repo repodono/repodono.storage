@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from zope.component import getUtility
+from zope.interface import alsoProvides
 
 from repodono.storage.interfaces import IStorage
+from repodono.storage.interfaces import IStorageEnabled
 from repodono.storage.interfaces import IStorageFactory
 from repodono.storage.interfaces import IStorageBackend
 from repodono.storage.interfaces import IStorageInstaller
@@ -22,7 +24,15 @@ class DummyStorageTestCase(unittest.TestCase):
     def test_adapt_fail(self):
         self.assertRaises(TypeError, IStorage, self.portal)
 
+    def test_install_not_enabled_fail(self):
+        installer = getUtility(IStorageInstaller)
+        with self.assertRaises(TypeError):
+            installer(self.portal, 'dummy_backend')
+
     def test_storage_lifecycle(self):
+        # have to mark portal with IStorageEnabled
+        alsoProvides(self.portal, IStorageEnabled)
+
         installer = getUtility(IStorageInstaller)
         installer(self.portal, 'dummy_backend')
 

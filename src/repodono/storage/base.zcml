@@ -8,7 +8,10 @@
       />
 
   <adapter factory="repodono.storage.base.StorageInfo" />
-  <adapter factory="repodono.storage.base.StorageFactory" />
+
+  <adapter
+      for="repodono.storage.interfaces.IStorageEnabled"
+      factory="repodono.storage.base.StorageFactory" />
 
   <!--
     This is probably too general, might need more specific interface
@@ -16,7 +19,7 @@
   -->
 
   <adapter
-      for="zope.annotation.interfaces.IAnnotatable"
+      for="repodono.storage.interfaces.IStorageEnabled"
       provides="repodono.storage.interfaces.IStorage"
       factory="repodono.storage.base.storage_adapter"
       />
