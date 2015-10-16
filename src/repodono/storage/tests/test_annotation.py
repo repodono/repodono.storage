@@ -129,13 +129,12 @@ class AnnotationTestCase(unittest.TestCase):
 
     def test_annotation_schema_fail_no_mapping(self):
         dummy = IDummy2(self.portal)
+
         # standard schema validation kicks in
-        self.assertRaises(
-            schema.interfaces.RequiredMissing,
-            setattr, dummy, 'field1', None)
-        self.assertRaises(
-            schema.interfaces.WrongType,
-            setattr, dummy, 'field3', u'test')
+        with self.assertRaises(schema.interfaces.RequiredMissing):
+            dummy.field1 = None
+        with self.assertRaises(schema.interfaces.WrongType):
+            dummy.field3 = u'test'
 
         # No mapping persisted.
         annotations = IAnnotations(self.portal)
