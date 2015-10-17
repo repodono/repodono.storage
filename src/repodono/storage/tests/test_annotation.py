@@ -71,7 +71,7 @@ class Dummy5Base(object):
 
     def super_foo(self, v):
         # for implementation of extension via super.
-        return self.foo(v)
+        return '(%s)' % v
 
 
 @annotator(IDummy5)
@@ -320,18 +320,9 @@ class AnnotationTestCase(unittest.TestCase):
         self.assertEqual(dummy.calc, "Some calculated value")
         self.assertEqual(dummy.base, "This is a base dummy class")
 
-        # ordinary methods that do not call super should work.
+        # call parent or super should work.
         self.assertEqual(dummy.foo('o_o'), "<(o_o)>")
-
-        # with super, since the inheritance has been flipped upside down
-        # and the referecences to the identifier is scoped globally it
-        # means only the decorated class will be referenced instead of
-        # the initial decoratee class.  This will then happen.
-
-        with self.assertRaises(RuntimeError) as cm:
-            dummy.super_foo('x_x')
-        self.assertEqual(cm.exception.args, (
-            'maximum recursion depth exceeded while calling a Python object',))
+        self.assertEqual(dummy.super_foo('o_o'), "<(o_o)>")
 
     def test_annotation_init_method_standard_multi_arg(self):
         # TODO add following to documentation to usage

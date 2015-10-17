@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from types import MethodType
+
 from zope.schema.interfaces import WrongType
 from zope.interface.interface import Method
-from zope.interface import implementer
+from zope.interface import classImplements
 from zope.component import adapter
 from zope.annotation.interfaces import IAnnotatable
 from zope.annotation.interfaces import IAnnotations
@@ -70,68 +72,75 @@ def annotator(iface, _key=None):
 
         names = _iface_fields(iface)
 
-        @adapter(IAnnotatable)
-        @implementer(iface)
-        class Annotation(class_):
-            def __init__(self, context, *a, **kw):
-                annotations = IAnnotations(context)
-                d = annotations.get(key, _marker)
+        classImplements(class_, iface)
+        class_ = adapter(IAnnotatable)(class_)
 
-                if d is _marker:
-                    d = {}  # to let the loading routine work.
-                elif not isinstance(d, PersistentMapping):
+        old_init = getattr(class_, '__init__')
+        old_setattr = getattr(class_, '__setattr__')
+
+        def __init__(self, context, *a, **kw):
+            annotations = IAnnotations(context)
+            d = annotations.get(key, _marker)
+
+            if d is _marker:
+                d = {}  # to let the loading routine work.
+            elif not isinstance(d, PersistentMapping):
+                raise TypeError(
+                    'Could not instantiate a `%s` from %s with Annotation '
+                    '`%s` as it is not of type PersistentMapping' % (
+                        classname, context, key))
+
+            for name in names:
+                value = d.get(name, _marker)
+                if value is _marker:
+                    # if instance already has this attribute defined,
+                    # do nothing.
+                    if hasattr(self, name):
+                        continue
+
+                # set the loaded value to the instance only.
+                try:
+                    old_setattr(self, name, d.get(name))
+                except WrongType as e:
                     raise TypeError(
-                        'Could not instantiate a `%s` from %s with Annotation '
-                        '`%s` as it is not of type PersistentMapping' % (
-                            classname, context, key))
+                        'Could not assign attribute `%s` to class `%s` '
+                        'with value from Annotation `%s` due to `%s`.' %
+                        (name, classname, key, e.__repr__()))
 
-                for name in names:
-                    value = d.get(name, _marker)
-                    if value is _marker:
-                        # if instance already has this attribute defined,
-                        # do nothing.
-                        if hasattr(self, name):
-                            continue
+            # finally associate context to the instance.
+            old_setattr(self, 'context', context)
+            old_init(self, *a, **kw)
 
-                    # set the loaded value to the instance only.
-                    try:
-                        super(Annotation, self).__setattr__(name, d.get(name))
-                    except WrongType as e:
-                        raise TypeError(
-                            'Could not assign attribute `%s` to class `%s` '
-                            'with value from Annotation `%s` due to `%s`.' %
-                            (name, classname, key, e.__repr__()))
+        def __setattr__(self, name, value):
+            """
+            Whenever an attribute is set, persist it into the
+            underyling PersistentMapping.
+            """
 
-                # finally associate context to the instance.
-                super(Annotation, self).__setattr__('context', context)
+            old_setattr(self, name, value)
 
-                super(Annotation, self).__init__(*a, **kw)
+            if name not in names:
+                return
 
-            def __setattr__(self, name, value):
-                """
-                Whenever an attribute is set, persist it into the
-                underyling PersistentMapping.
-                """
+            d = _setup_dict_annotation(self.context, key)
+            d[name] = value
 
-                super(Annotation, self).__setattr__(name, value)
+        # TODO make the removal feature not an instance method
+        # within every class?
 
-                if name not in names:
-                    return
+        def uninstall(self):
+            """
+            Completely removes the annotation from context.
+            """
 
-                d = _setup_dict_annotation(self.context, key)
-                d[name] = value
+            return _teardown_dict_annotation(self.context, key)
 
-            # TODO make the removal feature not an instance method
-            # within every class?
+        # bind the modified methods to the input class
 
-            def uninstall(self):
-                """
-                Completely removes the annotation from context.
-                """
+        class_.__init__ = MethodType(__init__, None, class_)
+        class_.__setattr__ = MethodType(__setattr__, None, class_)
+        class_.uninstall = MethodType(uninstall, None, class_)
 
-                return _teardown_dict_annotation(self.context, key)
-
-        return type(class_.__name__, (Annotation,), {
-            '__module__': class_.__module__})
+        return class_
 
     return decorator
