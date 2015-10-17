@@ -70,24 +70,16 @@ class Dummy5Base(object):
         return '(%s)' % v
 
     def super_foo(self, v):
-        # for implementation of extension via super.
         return '(%s)' % v
 
 
 @annotator(IDummy5)
 class Dummy5Init1(Dummy5Base):
 
+    # TODO investigate whether or not it make sense to explicitly
+    # require the `context` argument.
+
     def __init__(self):
-        # TODO put the following in documentation for usage of this
-
-        # This will not work because the class annotations can mess with
-        # inheritance and this particular one __really__ mess everything
-        # up.  If the following super call is needed, the first argument
-        # must be the class before it got decorated with.
-
-        # super(Dummy5Init1, self).__init__()
-
-        # So, do this instead.
         Dummy5Base.__init__(self)
         self.calc = "Some calculated value"
 
@@ -103,8 +95,9 @@ class Dummy5Init1(Dummy5Base):
 @adapter(IAnnotatable, Interface, Interface)
 @annotator(IDummy5)
 class Dummy5Init2(Dummy5Base):
+
     def __init__(self, arg1, arg2):
-        Dummy5Base.__init__(self)
+        super(Dummy5Init2, self).__init__()
         self.calc = arg1 + arg2
 
 
@@ -332,16 +325,14 @@ class AnnotationTestCase(unittest.TestCase):
         # context, but this accepts it.  Reason is how the decorator
         # injected that argument into the method then consume it at the
         # end before passing it back to the decoratee class's __init__
-        # method.  However note that super().__init__ cannot be called
-        # for multiple reasons, including the mismatch of arguments.
-        # This may be fixed later, but for now accept the weirdness in
-        # the number of arguments.
+        # method.
 
         dummy = Dummy5Init2(self.portal, 'testv1', 'testv2')
         self.assertEqual(dummy.calc, "testv1testv2")
         self.assertEqual(dummy.base, "This is a base dummy class")
 
-        # Should work through ZCA.
+        # Should work through ZCA, in this case with an init calling
+        # super.
         dummy = getMultiAdapter((self.portal, 'testv1', 'testv2'), IDummy5)
         self.assertEqual(dummy.calc, "testv1testv2")
         self.assertEqual(dummy.base, "This is a base dummy class")
