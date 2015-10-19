@@ -65,6 +65,7 @@ class IStorageFactory(Interface):
         title=_(u'Backend'),
         description=_(u'The identifier for the backend.'),
         required=True,
+        readonly=True,
         vocabulary='repodono.storage.backends',
     )
 
