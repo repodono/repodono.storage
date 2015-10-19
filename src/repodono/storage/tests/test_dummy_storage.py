@@ -14,7 +14,7 @@ from repodono.storage.testing.storage import DummyStorage
 import unittest
 
 
-class DummyStorageTestCase(unittest.TestCase):
+class DummyStorageIntegrationTestCase(unittest.TestCase):
 
     layer = REPODONO_DUMMY_STORAGE_INTEGRATION_TESTING
 
