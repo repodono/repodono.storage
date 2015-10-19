@@ -11,6 +11,12 @@ from persistent.mapping import PersistentMapping
 
 _marker = object()
 
+"""
+This entire module might benefit from being extracted into its own
+package, perhaps at the collective namespace (collective.pmad, for
+PersistentMapping Annotation Decorator).
+"""
+
 
 def to_key(prefix, name):
     return prefix + '.' + name

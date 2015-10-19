@@ -30,7 +30,8 @@ class DummyStorageTestCase(unittest.TestCase):
             installer(self.portal, 'dummy_backend')
 
     def test_storage_lifecycle(self):
-        # have to mark portal with IStorageEnabled
+        # have to mark the object manually with IStorageEnabled.
+        # Normally dexterity behavior will provide this.
         alsoProvides(self.portal, IStorageEnabled)
 
         installer = getUtility(IStorageInstaller)
