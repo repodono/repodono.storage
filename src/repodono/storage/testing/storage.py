@@ -8,6 +8,10 @@ from repodono.storage.base import BaseStorageBackend
 from repodono.storage.base import BaseStorage
 from repodono.storage.interfaces import IStorageInfo
 
+from repodono.storage.exceptions import PathNotFoundError
+from repodono.storage.exceptions import RevisionNotFoundError
+from repodono.storage.exceptions import StorageNotFoundError
+
 
 def readfile(fullpath):
     with open(fullpath) as fd:
@@ -44,7 +48,7 @@ class DummyStorageBackend(BaseStorageBackend):
 
     def acquire(self, context):
         if context.id not in self._data:
-            raise ValueError(
+            raise StorageNotFoundError(
                 "context does not have a storage instance installed")
         result = DummyStorage(context)
         return result
@@ -77,15 +81,46 @@ class DummyStorage(BaseStorage):
         rawdata = DummyStorageData._data
         return rawdata[self.context.id]
 
+    def _get_changeset(self, rev):
+        try:
+            return self._data()[rev]
+        except IndexError:
+            raise RevisionNotFoundError()
+
+    def _validate_rev(self, rev):
+        """
+        Internal use, validates that a rev is an int and that it is also
+        a valid index for context's associated data node.
+        """
+
+        if not isinstance(rev, int):
+            raise RevisionNotFoundError()
+
+        # ensure this can be fetched.
+        self._get_changeset(rev)
+        return rev
+
     @property
     def rev(self):
-        return self._rev
+        return str(self._rev)
+
+    def basename(self, path):
+        return path.rsplit('/')[-1]
 
     def checkout(self, rev=None):
         if rev is None:
-            rev = str(len(self._data()) - 1)
+            rev = len(self._data()) - 1
+        elif not (isinstance(rev, basestring) and rev.isdigit()):
+            raise RevisionNotFoundError()
 
-        self._rev = rev
+        self._rev = self._validate_rev(int(rev))
+
+    def file(self, path):
+        data = self._get_changeset(self._rev)
+        try:
+            return data[path]
+        except KeyError:
+            raise PathNotFoundError()
 
 
 class DummyFSStorageBackend(BaseStorageBackend):

@@ -16,6 +16,27 @@ class BaseStorage(object):
     def __init__(self, context):
         self.context = context
 
+    def basename(self, path):
+        raise NotImplementedError
+
+    def checkout(self, rev=None):
+        raise NotImplementedError
+
+    def file(self, path):
+        raise NotImplementedError
+
+    def files(self):
+        raise NotImplementedError
+
+    def listdir(self, path):
+        raise NotImplementedError
+
+    def log(self, start, count, branch=None):
+        raise NotImplementedError
+
+    def pathinfo(self, path):
+        raise NotImplementedError
+
 
 @implementer(IStorageBackend)
 class BaseStorageBackend(object):

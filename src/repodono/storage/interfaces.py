@@ -91,6 +91,18 @@ class IStorage(Interface):
     Common storage class used by the workspace implementation.
     """
 
+    # Should be a read-only property.
+    rev = schema.TextLine(
+        title=_(u'Current Revision'),
+        description=_(u'The currently active revision'),
+        required=True,
+    )
+
+    def basename(path):
+        """
+        Return the basename of the given path.
+        """
+
     def checkout(rev=None):
         """
         Activate the revision identify by the rev.  All file operations

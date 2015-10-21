@@ -6,6 +6,10 @@ from zope.interface import alsoProvides
 
 from plone.dexterity.content import Item
 
+from repodono.storage.exceptions import PathNotFoundError
+from repodono.storage.exceptions import RevisionNotFoundError
+from repodono.storage.exceptions import StorageNotFoundError
+
 from repodono.storage.interfaces import IStorage
 from repodono.storage.interfaces import IStorageEnabled
 from repodono.storage.interfaces import IStorageFactory
@@ -25,11 +29,22 @@ path = lambda p: join(dirname(storage.__file__), 'data', p)
 
 class DummyStorageBackendTestCase(unittest.TestCase):
 
+    maxDiff = None
+
     def setUp(self):
         self.backend = DummyStorageBackend()
 
     def tearDown(self):
         DummyStorageData.teardown()
+
+    def test_teardown(self):
+        orig = self.backend._data
+        self.assertIs(orig, DummyStorageData._data)
+        self.backend.install(Item(id='testdummy'))
+        self.assertIn('testdummy', DummyStorageData._data)
+        DummyStorageData.teardown()
+        self.assertIs(orig, DummyStorageData._data)
+        self.assertNotIn('testdummy', DummyStorageData._data)
 
     def test_backend_loader(self):
         self.backend.load_dir('test', path('testrepo'))
@@ -62,11 +77,37 @@ class DummyStorageTestCase(unittest.TestCase):
     def tearDown(self):
         DummyStorageData.teardown()
 
-    def test_acquire(self):
+    def test_acquire_fail(self):
+        item = Item(id='not_installed')
+        self.assertRaises(StorageNotFoundError, self.backend.acquire, item)
+
+    def test_acquire_basic(self):
         item = Item(id='dummy_a')
         storage = self.backend.acquire(item)
         self.assertEqual(item, storage.context)
         self.assertEqual(storage.rev, '3')
+        self.assertEqual(
+            storage.file('file1'), 'file2-rev0\nThis is also a test file.\n')
+        self.assertEqual(
+            storage.file('dir1/dir2/f2'), 'second file in dir2\n')
+        storage.checkout('0')
+        self.assertEqual(storage.rev, '0')
+        self.assertEqual(
+            storage.file('file1'), 'file1-rev0\nThis is a test file.\n')
+
+    def test_bad_revision(self):
+        item = Item(id='dummy_a')
+        storage = self.backend.acquire(item)
+        self.assertRaises(RevisionNotFoundError, storage.checkout, '123')
+        self.assertRaises(RevisionNotFoundError, storage.checkout, 'abc')
+        self.assertRaises(RevisionNotFoundError, storage.checkout, '4')
+        self.assertRaises(RevisionNotFoundError, storage.checkout, 3)
+
+    def test_bad_path(self):
+        item = Item(id='dummy_a')
+        storage = self.backend.acquire(item)
+        with self.assertRaises(PathNotFoundError):
+            storage.file('no/such/path')
 
 
 class DummyStorageIntegrationTestCase(unittest.TestCase):

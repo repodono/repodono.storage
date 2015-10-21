@@ -7,6 +7,7 @@ from repodono.storage.interfaces import IStorageEnabled
 from repodono.storage.interfaces import IStorageFactory
 from repodono.storage.interfaces import IStorageInfo
 from repodono.storage.base import BaseStorageBackend
+from repodono.storage.base import BaseStorage
 
 from plone.app.contenttypes.tests.robot.variables import TEST_FOLDER_ID
 
@@ -18,11 +19,22 @@ import unittest
 
 class BaseDefaultTestCase(unittest.TestCase):
 
-    def test_default_impl(self):
+    def test_default_backend_impl(self):
         # default data, no annotation
         backend = BaseStorageBackend()
         self.assertRaises(NotImplementedError, backend.acquire, None)
         self.assertRaises(NotImplementedError, backend.install, None)
+
+    def test_default_storage_impl(self):
+        # default data, no real context.
+        storage = BaseStorage(None)
+        self.assertRaises(NotImplementedError, storage.basename, None)
+        self.assertRaises(NotImplementedError, storage.checkout, None)
+        self.assertRaises(NotImplementedError, storage.file, None)
+        self.assertRaises(NotImplementedError, storage.files)
+        self.assertRaises(NotImplementedError, storage.listdir, None)
+        self.assertRaises(NotImplementedError, storage.log, None, None)
+        self.assertRaises(NotImplementedError, storage.pathinfo, None)
 
 
 class StorageFactoryTestCase(unittest.TestCase):
