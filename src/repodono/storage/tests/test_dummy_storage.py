@@ -90,10 +90,18 @@ class DummyStorageTestCase(unittest.TestCase):
             storage.file('file1'), 'file2-rev0\nThis is also a test file.\n')
         self.assertEqual(
             storage.file('dir1/dir2/f2'), 'second file in dir2\n')
+        self.assertEqual(storage.files(), [
+            'dir1/dir2/f1', 'dir1/dir2/f2', 'dir1/dir3/dir4/dir5/info',
+            'dir1/f1', 'dir1/f2', 'file1', 'file3',
+        ])
+
+        self.assertEqual(storage.basename('dir1/dir3/dir4/dir5/info'), 'info')
+
         storage.checkout('0')
         self.assertEqual(storage.rev, '0')
         self.assertEqual(
             storage.file('file1'), 'file1-rev0\nThis is a test file.\n')
+        self.assertEqual(storage.files(), ['file1', 'file2'])
 
     def test_bad_revision(self):
         item = Item(id='dummy_a')

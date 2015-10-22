@@ -115,6 +115,9 @@ class DummyStorage(BaseStorage):
 
         self._rev = self._validate_rev(int(rev))
 
+    def files(self):
+        return sorted(self._get_changeset(self._rev).keys())
+
     def file(self, path):
         data = self._get_changeset(self._rev)
         try:
