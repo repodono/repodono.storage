@@ -125,6 +125,19 @@ class DummyStorage(BaseStorage):
         except KeyError:
             raise PathNotFoundError()
 
+    def listdir(self, path):
+        if path and not path.endswith('/'):
+            # root is empty path, and specific paths must end with '/'
+            # for the code to work.
+            path += '/'
+        result = sorted({
+            i.replace(path, '').split('/')[0]
+            for i in self.files() if i.startswith(path)
+        })
+        if not result:
+            raise PathNotFoundError()
+        return result
+
 
 class DummyFSStorageBackend(BaseStorageBackend):
     """

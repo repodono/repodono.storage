@@ -96,12 +96,28 @@ class DummyStorageTestCase(unittest.TestCase):
         ])
 
         self.assertEqual(storage.basename('dir1/dir3/dir4/dir5/info'), 'info')
+        self.assertEqual(storage.listdir(''), ['dir1', 'file1', 'file3'])
+        self.assertEqual(storage.listdir('dir1'), ['dir2', 'dir3', 'f1', 'f2'])
+        self.assertEqual(storage.listdir('dir1/dir2'), ['f1', 'f2'])
+
+        with self.assertRaises(PathNotFoundError):
+            storage.listdir('dir1/no/such/dir')
+
+        # this implementation will raise an error if trying to access a
+        # file as directory.
+
+        with self.assertRaises(PathNotDirError):
+            storage.listdir('file1')
 
         storage.checkout('0')
         self.assertEqual(storage.rev, '0')
         self.assertEqual(
             storage.file('file1'), 'file1-rev0\nThis is a test file.\n')
         self.assertEqual(storage.files(), ['file1', 'file2'])
+        self.assertEqual(storage.listdir(''), ['file1', 'file2'])
+
+        with self.assertRaises(PathNotFoundError):
+            storage.listdir('dir1')
 
     def test_bad_revision(self):
         item = Item(id='dummy_a')
