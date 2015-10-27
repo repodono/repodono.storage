@@ -36,6 +36,25 @@ class BaseDefaultTestCase(unittest.TestCase):
         self.assertRaises(NotImplementedError, storage.log, None, None)
         self.assertRaises(NotImplementedError, storage.pathinfo, None)
 
+    def test_storage_datefmt(self):
+        storage = BaseStorage(None)
+        self.assertEqual(storage.datefmt, 'iso8601')
+        iso8601 = storage.datefmtstr
+        self.assertTrue(iso8601.startswith('%Y'))
+
+        storage.datefmt = 'rfc2822'
+        self.assertEqual(storage.datefmt, 'rfc2822')
+        self.assertTrue(storage.datefmtstr.startswith('%a'))
+
+        with self.assertRaises(ValueError):
+            storage.datefmt = 'invalid'
+
+        self.assertEqual(storage.datefmt, 'rfc2822')
+
+        # Defaults back to default iso8601
+        storage._datefmt = 'invalid'
+        self.assertEqual(storage.datefmtstr, iso8601)
+
 
 class StorageFactoryTestCase(unittest.TestCase):
 

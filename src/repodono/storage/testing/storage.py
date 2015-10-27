@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 from glob import glob
 from os.path import join
 from os.path import relpath
@@ -8,6 +9,7 @@ from repodono.storage.base import BaseStorageBackend
 from repodono.storage.base import BaseStorage
 from repodono.storage.interfaces import IStorageInfo
 
+from repodono.storage.exceptions import PathNotDirError
 from repodono.storage.exceptions import PathNotFoundError
 from repodono.storage.exceptions import RevisionNotFoundError
 from repodono.storage.exceptions import StorageNotFoundError
@@ -77,6 +79,13 @@ class DummyStorage(BaseStorage):
         super(DummyStorage, self).__init__(context)
         self.checkout()
 
+    def _datetime(self, rev=None):
+        i = rev
+        if rev is None:
+            i = self._rev
+        ts = datetime.utcfromtimestamp(i * 9876 + 1111111111 + 46800)
+        return ts.strftime(self.datefmtstr)
+
     def _data(self):
         rawdata = DummyStorageData._data
         return rawdata[self.context.id]
@@ -135,8 +144,47 @@ class DummyStorage(BaseStorage):
             for i in self.files() if i.startswith(path)
         })
         if not result:
-            raise PathNotFoundError()
+            raise PathNotDirError()
         return result
+
+    def _logentry(self, rev):
+        if rev < 0:
+            return
+        if rev == 0:
+            files = self._get_changeset(0).keys()
+            files.sort()
+            return '\n'.join(['A:%s' % i for i in files])
+
+        newcs = self._get_changeset(rev)
+        oldcs = self._get_changeset(rev - 1)
+        results = []
+        files = set(oldcs.keys() + newcs.keys())
+
+        for f in files:
+            if f not in oldcs:
+                results.append('A:%s' % f)
+            elif f not in newcs:
+                results.append('D:%s' % f)
+            elif not oldcs[f] == newcs[f]:
+                results.append('C:%s' % f)
+
+        results.sort()
+        return '\n'.join(results)
+
+    def log(self, start, count, branch=None, *a, **kw):
+        start = self._validate_rev(int(start))
+        results = []
+        for i in range(start, start - count, -1):
+            entry = self._logentry(i)
+            if not entry:
+                break
+            results.append({
+                'node': str(i),
+                'date': self._datetime(i),
+                'author': 'tester <tester@example.com>',
+                'desc': entry,
+            })
+        return results
 
 
 class DummyFSStorageBackend(BaseStorageBackend):

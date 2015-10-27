@@ -13,6 +13,31 @@ from .interfaces import IStorageInfo
 @implementer(IStorage)
 class BaseStorage(object):
 
+    _default_datefmt = {
+        'rfc2822': '%a, %d %b %Y %H:%M:%S +0000',
+        'rfc3339': '%Y-%m-%dT%H:%M:%SZ',
+        'iso8601': '%Y-%m-%d %H:%M:%S',
+    }
+
+    _datefmt = 'iso8601'
+
+    @property
+    def datefmt(self):
+        _default = 'iso8601'
+        return ((self._datefmt in self._default_datefmt)
+                and self._datefmt or _default)
+
+    @datefmt.setter
+    def datefmt(self, value):
+        if value in self._default_datefmt:
+            self._datefmt = value
+        else:
+            raise ValueError('unsupported datetime format')
+
+    @property
+    def datefmtstr(self):
+        return self._default_datefmt.get(self.datefmt, '%Y-%m-%d %H:%M:%S')
+
     def __init__(self, context):
         self.context = context
 

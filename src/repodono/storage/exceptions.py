@@ -17,3 +17,15 @@ class RevisionNotFoundError(KeyError):
     """
     Error looking up a revision in a storage.
     """
+
+
+class PathNotDirError(PathNotFoundError):
+    """
+    Path is not a dir.
+    """
+
+
+class PathNotFileError(PathNotFoundError):
+    """
+    Path is not a file.
+    """

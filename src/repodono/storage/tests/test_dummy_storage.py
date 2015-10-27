@@ -7,6 +7,7 @@ from zope.interface import alsoProvides
 from plone.dexterity.content import Item
 
 from repodono.storage.exceptions import PathNotFoundError
+from repodono.storage.exceptions import PathNotDirError
 from repodono.storage.exceptions import RevisionNotFoundError
 from repodono.storage.exceptions import StorageNotFoundError
 
@@ -118,6 +119,44 @@ class DummyStorageTestCase(unittest.TestCase):
 
         with self.assertRaises(PathNotFoundError):
             storage.listdir('dir1')
+
+    def test_log_multi(self):
+        item = Item(id='dummy_a')
+        storage = self.backend.acquire(item)
+        log_entries = storage.log(storage.rev, 10)
+        self.assertEqual(log_entries, [{
+            'author': 'tester <tester@example.com>',
+            'date': '2005-03-18 23:12:19',
+            'desc': 'A:dir1/dir2/f1\nA:dir1/dir2/f2\n'
+                    'A:dir1/dir3/dir4/dir5/info\nA:file1\nD:file2',
+            'node': '3'
+        }, {
+            'author': 'tester <tester@example.com>',
+            'date': '2005-03-18 20:27:43',
+            'desc': 'A:dir1/f1\nA:dir1/f2\nC:file3\nD:file1',
+            'node': '2'
+        }, {
+            'author': 'tester <tester@example.com>',
+            'date': '2005-03-18 17:43:07',
+            'desc': 'A:file3\nC:file1',
+            'node': '1'
+        }, {
+            'author': 'tester <tester@example.com>',
+            'date': '2005-03-18 14:58:31',
+            'desc': 'A:file1\nA:file2',
+            'node': '0'
+        }])
+
+    def test_log_single(self):
+        item = Item(id='dummy_a')
+        storage = self.backend.acquire(item)
+        log_entries = storage.log('1', 1)
+        self.assertEqual(log_entries, [{
+            'author': 'tester <tester@example.com>',
+            'date': '2005-03-18 17:43:07',
+            'desc': 'A:file3\nC:file1',
+            'node': '1'
+        }])
 
     def test_bad_revision(self):
         item = Item(id='dummy_a')
