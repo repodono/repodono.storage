@@ -19,6 +19,8 @@ from repodono.storage.interfaces import IStorageInstaller
 
 from repodono.storage.testing import REPODONO_DUMMY_STORAGE_INTEGRATION_TESTING
 from repodono.storage.testing import storage
+from repodono.storage.testing.storage import DummyFSStorage
+from repodono.storage.testing.storage import DummyFSStorageBackend
 from repodono.storage.testing.storage import DummyStorage
 from repodono.storage.testing.storage import DummyStorageBackend
 from repodono.storage.testing.storage import DummyStorageData
@@ -205,6 +207,35 @@ class DummyStorageTestCase(unittest.TestCase):
         storage = self.backend.acquire(item)
         with self.assertRaises(PathNotFoundError):
             storage.file('no/such/path')
+
+    def test_datetime(self):
+        item = Item(id='dummy_a')
+        storage = self.backend.acquire(item)
+        self.assertEqual(storage._datetime(), '2005-03-18 23:12:19')
+        storage.checkout('0')
+        self.assertEqual(storage._datetime(), '2005-03-18 14:58:31')
+
+    def test_validate_rev_failure(self):
+        item = Item(id='dummy_a')
+        storage = self.backend.acquire(item)
+        with self.assertRaises(RevisionNotFoundError):
+            storage._validate_rev('0')
+
+
+class DummyFSStorageBackendTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.backend = DummyFSStorageBackend()
+
+    def tearDown(self):
+        pass
+
+    def test_basic(self):
+        # just to show that this works, for now.
+        item = Item(id='dummy_a')
+        self.backend.install(item)
+        storage = self.backend.acquire(item)
+        self.assertTrue(isinstance(storage, DummyFSStorage))
 
 
 class DummyStorageIntegrationTestCase(unittest.TestCase):
