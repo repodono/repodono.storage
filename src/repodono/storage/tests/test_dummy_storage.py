@@ -110,6 +110,30 @@ class DummyStorageTestCase(unittest.TestCase):
         with self.assertRaises(PathNotDirError):
             storage.listdir('file1')
 
+        # acquire the detailed information associated with this path.
+        self.assertEqual(storage.pathinfo('dir1'), {
+            'basename': 'dir1',
+            'size': 0,
+            'type': 'folder',
+            'date': '2005-03-18 23:12:19',
+        })
+
+        # ditto for a file
+        self.assertEqual(storage.pathinfo('file1'), {
+            'basename': 'file1',
+            'size': 37,
+            'type': 'file',
+            'date': '2005-03-18 23:12:19',
+        })
+
+        # or something nested deeper
+        self.assertEqual(storage.pathinfo('dir1/dir3/dir4/dir5/info'), {
+            'basename': 'info',
+            'size': 32,
+            'type': 'file',
+            'date': '2005-03-18 23:12:19',
+        })
+
         storage.checkout('0')
         self.assertEqual(storage.rev, '0')
         self.assertEqual(
@@ -119,6 +143,16 @@ class DummyStorageTestCase(unittest.TestCase):
 
         with self.assertRaises(PathNotFoundError):
             storage.listdir('dir1')
+
+        with self.assertRaises(PathNotFoundError):
+            storage.pathinfo('dir1')
+
+        self.assertEqual(storage.pathinfo('file1'), {
+            'basename': 'file1',
+            'size': 32,
+            'type': 'file',
+            'date': '2005-03-18 14:58:31',
+        })
 
     def test_log_multi(self):
         item = Item(id='dummy_a')

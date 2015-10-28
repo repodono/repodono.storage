@@ -186,6 +186,30 @@ class DummyStorage(BaseStorage):
             })
         return results
 
+    def pathinfo(self, path):
+        result = {
+            'date': self._datetime(self._rev),
+            'basename': self.basename(path),
+        }
+
+        try:
+            contents = self.file(path)
+        except PathNotFoundError:
+            pass
+        else:
+            result['size'] = len(contents)
+            result['type'] = 'file'
+            return result
+
+        try:
+            self.listdir(path)
+        except PathNotDirError:
+            raise PathNotFoundError()
+        else:
+            result['size'] = 0
+            result['type'] = 'folder'
+            return result
+
 
 class DummyFSStorageBackend(BaseStorageBackend):
     """
