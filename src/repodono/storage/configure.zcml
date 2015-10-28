@@ -10,6 +10,7 @@
   <i18n:registerTranslations directory="locales" />
 
   <include file="base.zcml" />
+  <include package=".behavior" />
   <include package=".browser" />
   <include file="vocab.zcml" />
 

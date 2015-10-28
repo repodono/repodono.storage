@@ -1,0 +1,12 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:plone="http://namespaces.plone.org/plone"
+    i18n_domain="repodono.storage">
+
+  <plone:behavior
+      title="Storage enabled"
+      description="Enable the usage of repodono storage."
+      provides="..interfaces.IStorageEnabled"
+      />
+
+</configure>
