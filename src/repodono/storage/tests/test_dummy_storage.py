@@ -221,6 +221,32 @@ class DummyStorageTestCase(unittest.TestCase):
         with self.assertRaises(RevisionNotFoundError):
             storage._validate_rev('0')
 
+    def test_subrepo(self):
+        self.backend.load_dir('external_root', path('external_root'))
+        self.backend.load_dir('external_test', path('external_test'))
+        item = Item(id='external_root')
+        storage = self.backend.acquire(item)
+
+        self.assertEqual(storage.file('external_test'), {
+            u'location': u'http://nohost/plone/workspace/external_test',
+            # u'path': '',  # this is basically not set.  Correct?
+            u'rev': u'0',
+            u'type': u'subrepo',
+        })
+
+        self.assertEqual(storage.file('external_test/test.txt'), {
+            u'location': u'http://nohost/plone/workspace/external_test',
+            u'path': 'test.txt',
+            u'rev': u'0',
+            u'type': u'subrepo',
+        })
+
+        self.assertEqual(storage.pathinfo('external_test'), {
+            u'location': u'http://nohost/plone/workspace/external_test',
+            u'rev': u'0',
+            u'type': u'subrepo',
+        })
+
 
 class DummyFSStorageBackendTestCase(unittest.TestCase):
 

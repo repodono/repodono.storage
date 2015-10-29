@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from datetime import datetime
+from logging import getLogger
 from glob import glob
 from os.path import join
 from os.path import relpath
 from os import walk
+import json
 
 from repodono.storage.base import BaseStorageBackend
 from repodono.storage.base import BaseStorage
@@ -13,6 +15,8 @@ from repodono.storage.exceptions import PathNotDirError
 from repodono.storage.exceptions import PathNotFoundError
 from repodono.storage.exceptions import RevisionNotFoundError
 from repodono.storage.exceptions import StorageNotFoundError
+
+logger = getLogger(__name__)
 
 
 def readfile(fullpath):
@@ -68,6 +72,27 @@ class DummyStorageBackend(BaseStorageBackend):
             }
             for p in sorted(glob(join(root, '*')))
         ]
+        for changeset in result:
+            if changeset.get('.dummystoragerc'):
+                f = changeset.get('.dummystoragerc')
+                try:
+                    j = json.loads(f)
+                    if not isinstance(j, dict):  # pragma: no cover
+                        raise ValueError
+                except ValueError:  # pragma: no cover
+                    logger.warning(
+                        'The `.dummystoragerc` provided in `%s` is invalid',
+                        root,
+                    )
+                else:
+                    externals = {}
+                    for path, v in j.iteritems():
+                        if (v.get('type') == 'subrepo' and
+                                isinstance(v.get('rev'), unicode) and
+                                isinstance(v.get('location'), unicode)):
+                            externals[path] = v
+                    changeset.update(externals)
+
         self._data[id_] = result
 
 
@@ -132,6 +157,17 @@ class DummyStorage(BaseStorage):
         try:
             return data[path]
         except KeyError:
+            # try to resolve the subrepo for the top level only.
+            frags = path.split('/')
+            if len(frags) > 1:
+                info = self.file(frags[0])
+                if isinstance(info, dict):
+                    # return the subrepo information.
+                    result = {
+                        'path': '/'.join(frags[1:]),
+                    }
+                    result.update(info)
+                    return result
             raise PathNotFoundError()
 
     def listdir(self, path):
@@ -197,6 +233,8 @@ class DummyStorage(BaseStorage):
         except PathNotFoundError:
             pass
         else:
+            if isinstance(contents, dict):
+                return contents
             result['size'] = len(contents)
             result['type'] = 'file'
             return result

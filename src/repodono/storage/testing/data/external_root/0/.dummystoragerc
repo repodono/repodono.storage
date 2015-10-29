@@ -1,0 +1,7 @@
+{
+    "external_test": {
+        "type": "subrepo",
+        "rev": "0",
+        "location": "http://nohost/plone/workspace/external_test"
+    }
+}
