@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from zope.component import getUtility
 from zope.interface import implementer
+from zope.interface import alsoProvides
 from zope.schema.fieldproperty import FieldProperty
 
 from .annotation import annotator
 from .interfaces import IStorage
 from .interfaces import IStorageBackend
+from .interfaces import IStorageEnabled
 from .interfaces import IStorageFactory
 from .interfaces import IStorageInfo
 
@@ -97,6 +99,12 @@ class StorageFactory(object):
 
     def __call__(self):
         return self.get_storage()
+
+
+def StorageFactoryAdd(context):
+    if not IStorageEnabled.providedBy(context):
+        alsoProvides(context, IStorageEnabled)
+    return StorageFactory(context)
 
 
 @annotator(IStorageInfo)

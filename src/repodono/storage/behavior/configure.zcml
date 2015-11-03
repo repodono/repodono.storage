@@ -3,10 +3,80 @@
     xmlns:plone="http://namespaces.plone.org/plone"
     i18n_domain="repodono.storage">
 
+  <!--
+    There is a bit of trickery with the following definition.
+
+    I originally wanted to leverage dexterity to provide the
+    ``IStorageEnabled`` so I can mayhaps leverage the framework better.
+
+      <plone:behavior
+          title="Storage enabled"
+          description="Enable the usage of repodono storage."
+          provides="..interfaces.IStorageEnabled"
+          />
+
+    I also wanted to leverage the autoforms behavior and have the
+    assignment done directly to the annotation.  One way to do this is
+    to do a factory, but the ``backend`` field is provided by
+    ``IStorageFactory``... A complication happened and turns out I can't
+    use that anyway as z3c.form doesn't seem to deal with readonly
+    fields (as if they don't exist, at least with the interaction
+    patterns I have toyed within dexterity), so I added the form hints
+    to ``IStorageEnabled`` instead...
+
+      <plone:behavior
+          title="Storage enabled"
+          description="Enable the usage of repodono storage."
+          provides="..interfaces.IStorageEnabled"
+          factory="..base.StorageFactory"
+          />
+
+    So the IStorageEnabled interface simply contain a surrogate Choice
+    field for the backend to activate, which should correctly invoke
+    StorageFactory to generate our object which has the readonly field
+    defined... except it doesn't actually work with the rest of the
+    framework we have defined so far because the context no longer
+    provides ``IStorageEnabled`` which is needed to adapt to a
+    ``StorageFactory`` instance.  So perhaps this:
+
+      <plone:behavior
+          title="Storage enabled"
+          description="Enable the usage of repodono storage."
+          provides="..interfaces.IStorageEnabled"
+          factory="..base.StorageFactory"
+          marker="..interfaces.IStorageEnabled"
+          />
+
+    With (or without) a subscriber to forcibly inject our enabled
+    marker to ensure that IStorageBackend
+
+      <subscriber
+          for="..interfaces.IStorageEnabled
+               zope.lifecycleevent.interfaces.IObjectCreatedEvent"
+          handler=".markers.applyStorageEnabledMarker"
+          />
+
+    But it doesn't actually work the way we want, since now nothing
+    works because somewhere along the line the context will also
+    provide ``IStorageEnabled`` which means it will no longer get to
+    a ``StorageFactory``.  Even though it looks like it might, the
+    framework does leverage ZCA properly an adaptation behaves like an
+    identity function (i.e. context provides IStorageEnabled, gets back
+    itself).  So ``StorageFactory`` is never invoked, backend is never
+    properly assigned.
+
+    So, the following is the correct behavior: define a dedicated set of
+    add interface and callable (factory) for the dexterity behavior
+    framework, and be done with it.
+
+    tl;dr: Ouroboros.
+  -->
+
   <plone:behavior
       title="Storage enabled"
       description="Enable the usage of repodono storage."
-      provides="..interfaces.IStorageEnabled"
+      provides="..interfaces.IStorageBackendAdd"
+      factory="..base.StorageFactoryAdd"
       />
 
 </configure>
