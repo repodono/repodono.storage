@@ -4,40 +4,20 @@
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 from zope.interface import Interface
 from zope import schema
-from zope.interface import provider
-
-from plone.autoform.interfaces import IFormFieldProvider
-from plone.autoform import directives
-from plone.supermodel import model
-from z3c.form.interfaces import IAddForm
 
 from repodono.storage import _
-from zope.interface import alsoProvides
 
 
 class IRepodonoStorageLayer(IDefaultBrowserLayer):
     """Marker interface that defines a browser layer."""
 
 
-@provider(IFormFieldProvider)
-class IStorageBackendAdd(Interface):
-    """Surrogate interface for IStorageBackend add behavior"""
-
-    model.fieldset('storage', label=u"Storage",
-                   fields=['backend'])
-
-    backend = schema.Choice(
-        title=_(u'Backend'),
-        description=_(u'The identifier for the backend.'),
-        required=True,
-        vocabulary='repodono.storage.backends',
-    )
-    directives.omitted('backend')
-    directives.no_omit(IAddForm, 'backend')
-
-
 class IStorageEnabled(Interface):
-    """Marker interface for objects to enable the usage of Storage."""
+    """
+    Marker interface for objects to enable the usage of Storage.
+
+    The various components are declared to adapt against this interface.
+    """
 
 
 class IStorageInfo(Interface):

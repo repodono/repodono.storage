@@ -1,0 +1,64 @@
+Storage behavior
+================
+
+Make up a storage_enabled content type::
+
+    >>> portal = layer['portal']
+    >>> from plone.dexterity.fti import DexterityFTI
+    >>> fti = DexterityFTI('storage_enabled')
+    >>> fti.klass = 'plone.dexterity.content.Item'
+    >>> fti.behaviors = ('repodono.storage.behavior.storage.IStorageEnabler',)
+    >>> portal.portal_types._setObject('storage_enabled', fti)
+    'storage_enabled'
+
+Setup a test browser::
+
+    >>> from plone.app.testing import TEST_USER_ID, TEST_USER_NAME, TEST_USER_PASSWORD, setRoles
+    >>> setRoles(portal, TEST_USER_ID, ['Manager'])
+    >>> import transaction; transaction.commit()
+    >>> from plone.testing.z2 import Browser
+    >>> browser = Browser(layer['app'])
+    >>> browser.addHeader('Authorization', 'Basic %s:%s' % (TEST_USER_NAME, TEST_USER_PASSWORD,))
+
+Try to add storage_enabled content::
+
+    >>> browser.open('http://nohost/plone/++add++storage_enabled')
+
+Check the backend options::
+
+    >>> backends = browser.getControl('Backend')
+    >>> backends.options
+    ['dummy_backend']
+
+Now select the dummy and add::
+
+    >>> backends.value
+    ['dummy_backend']
+    >>> browser.getControl('Save').click()
+    >>> browser.url
+    'http://nohost/plone/storage_enabled/view'
+
+Inspect the underlying object to see that the marker interfaces and the
+annotation is set correctly::
+
+    >>> from zope.annotation.interfaces import IAnnotations
+    >>> IAnnotations(portal.storage_enabled)[
+    ...     'repodono.storage.base.StorageFactory']
+    {'backend': u'dummy_backend'}
+    >>> from repodono.storage.interfaces import IStorageEnabled
+    >>> from repodono.storage.interfaces import IStorageFactory
+    >>> IStorageEnabled.providedBy(portal.storage_enabled)
+    True
+    >>> IStorageFactory(portal.storage_enabled)
+    <repodono.storage.base.StorageFactory object at ...>
+
+Should be possible to adapt directly to a storage::
+
+    >>> from repodono.storage.interfaces import IStorage
+    >>> IStorage(portal.storage_enabled)
+    <repodono.storage.testing.storage.DummyStorage object at ...>
+
+TODO:
+- Need to do one that doesn't have the dummies installed (i.e. without
+  ANY defined storage, what are the error/failure case there).
+- Need to repeat this test using IWorkspace as its schema contains id.

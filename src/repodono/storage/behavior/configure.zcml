@@ -63,7 +63,13 @@
     framework does leverage ZCA properly an adaptation behaves like an
     identity function (i.e. context provides IStorageEnabled, gets back
     itself).  So ``StorageFactory`` is never invoked, backend is never
-    properly assigned.
+    properly assigned.  Even avoiding that, the base.StorageFactory
+    must NOT manually apply the same interface declared in the behavior
+    provides section, as the datamanager will correctly adapt to that
+    factory, then longer adapt as the context now provides the same
+    interface that the behavior expects.  In other words, the factory
+    is only ever invoked if the context does not already provides the
+    interface specified by provides.
 
     So, the following is the correct behavior: define a dedicated set of
     add interface and callable (factory) for the dexterity behavior
@@ -75,8 +81,21 @@
   <plone:behavior
       title="Storage enabled"
       description="Enable the usage of repodono storage."
-      provides="..interfaces.IStorageBackendAdd"
-      factory="..base.StorageFactoryAdd"
+      provides=".storage.IStorageEnabler"
+      factory=".storage.StorageEnabler"
+      />
+
+  <!--
+    Naturally, the underlying storage will need to be instantiated
+    after the object has been successfully created, so here is the
+    subscriber of the event for that.  ``StorageEnabler`` will have to
+    manually make context to provide the IStorageEnabled interface.
+  -->
+
+  <subscriber
+      for=".storage.IStorageEnabled
+           zope.lifecycleevent.interfaces.IObjectCreatedEvent"
+      handler=".storage.StorageCreate"
       />
 
 </configure>
