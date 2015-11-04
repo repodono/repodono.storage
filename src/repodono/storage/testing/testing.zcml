@@ -8,4 +8,9 @@
       name="dummy_backend"
       />
 
+  <!--
+    Uncomment if this becomes a thing we need.
+    <adapter factory="repodono.storage.testing.storage.DummyStorageInfo" />
+  -->
+
 </configure>

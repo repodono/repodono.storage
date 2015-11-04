@@ -24,6 +24,16 @@ def readfile(fullpath):
         return fd.read()
 
 
+def get_dummy_id(context):
+    # TODO figure out a better testing strategy once this is figured otu.
+    # TODO figure out whether to use the following interface
+    try:
+        id_ = IStorageInfo(context).path
+    except TypeError:  # for a ZCA-less implementation/fallback
+        id_ = context.id
+    return id_
+
+
 class IDummyStorageInfo(IStorageInfo):
     """
     Information for the dummy storage info.
@@ -53,15 +63,25 @@ class DummyStorageBackend(BaseStorageBackend):
         self._data = DummyStorageData._data
 
     def acquire(self, context):
-        if context.id not in self._data:
+        if get_dummy_id(context) not in self._data:
             raise StorageNotFoundError(
                 "context does not have a storage instance installed")
         result = DummyStorage(context)
         return result
 
     def install(self, context):
-        if context.id not in self._data:
-            self._data[context.id] = [{}]
+        # TODO id generator for uniqueness, instead of relying on the
+        # one provided by context, especially since with pure dexterity
+        # it can result in a newly created one that lacks one.
+        id_ = unicode(context.id)
+        try:
+            info = IStorageInfo(context)
+            info.path = id_
+        except TypeError:
+            # ZCA-less, ignore.
+            pass
+        if id_ not in self._data:
+            self._data[id_] = [{}]
 
     def load_dir(self, id_, root):
         result = [
@@ -113,7 +133,7 @@ class DummyStorage(BaseStorage):
 
     def _data(self):
         rawdata = DummyStorageData._data
-        return rawdata[self.context.id]
+        return rawdata[get_dummy_id(self.context)]
 
     def _get_changeset(self, rev):
         try:
