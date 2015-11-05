@@ -15,15 +15,15 @@ If the create factory was manually invoked without any default values,
 it should still result in the creation of the item, albeit with a lack
 of an instantiated backend::
 
-    >>> portal.invokeFactory('storage_enabled', 'storage_enabled')
-    'storage_enabled'
-    >>> portal['storage_enabled']
+    >>> portal.invokeFactory('storage_enabled', 'dummy')
+    'dummy'
+    >>> portal['dummy']
     <Item ...>
 
 Also, the factory (backend) will be unassigned::
 
     >>> from zope.annotation.interfaces import IAnnotations
-    >>> IAnnotations(portal.storage_enabled).get(
+    >>> IAnnotations(portal.dummy).get(
     ...     'repodono.storage.base.StorageFactory')
 
 This ties in with how a site with a type that has the storage behavior
