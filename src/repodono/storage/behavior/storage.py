@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from zope import schema
 from zope.interface import provider
-from zope.interface import alsoProvides
 
 from plone.autoform.interfaces import IFormFieldProvider
 from plone.autoform import directives
@@ -9,9 +8,7 @@ from plone.supermodel import model
 from z3c.form.interfaces import IAddForm
 
 from repodono.storage import _
-from repodono.storage.interfaces import IStorageEnabled
 from repodono.storage.interfaces import IStorageFactory
-from repodono.storage.base import StorageFactory
 
 
 @provider(IFormFieldProvider)
@@ -36,16 +33,6 @@ class IStorageEnabler(model.Schema):
 
     directives.omitted('backend')
     directives.no_omit(IAddForm, 'backend')
-
-
-def StorageEnabler(context):
-    """
-    The companion factory for the above behavior interface.
-    """
-
-    if not IStorageEnabled.providedBy(context):
-        alsoProvides(context, IStorageEnabled)
-    return StorageFactory(context)
 
 
 def StorageCreate(obj, event):

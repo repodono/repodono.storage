@@ -47,8 +47,8 @@
           marker="..interfaces.IStorageEnabled"
           />
 
-    With (or without) a subscriber to forcibly inject our enabled
-    marker to ensure that IStorageBackend
+    With (or without) a subscriber to forcibly inject our enabled marker
+    to ensure that IStorageBackend
 
       <subscriber
           for="..interfaces.IStorageEnabled
@@ -57,43 +57,44 @@
           />
 
     But it doesn't actually work the way we want, since now nothing
-    works because somewhere along the line the context will also
-    provide ``IStorageEnabled`` which means it will no longer get to
-    a ``StorageFactory``.  Even though it looks like it might, the
+    works because somewhere along the line the context will also provide
+    ``IStorageEnabled`` which means it will no longer get to a
+    ``StorageFactory``.  Even though it looks like it might, the
     framework does leverage ZCA properly an adaptation behaves like an
     identity function (i.e. context provides IStorageEnabled, gets back
     itself).  So ``StorageFactory`` is never invoked, backend is never
-    properly assigned.  Even avoiding that, the base.StorageFactory
-    must NOT manually apply the same interface declared in the behavior
+    properly assigned.  Even avoiding that, the base.StorageFactory must
+    NOT manually apply the same interface declared in the behavior
     provides section, as the datamanager will correctly adapt to that
     factory, then longer adapt as the context now provides the same
-    interface that the behavior expects.  In other words, the factory
-    is only ever invoked if the context does not already provides the
+    interface that the behavior expects.  In other words, the factory is
+    only ever invoked if the context does not already provides the
     interface specified by provides.
 
-    So, the following is the correct behavior: define a dedicated set of
-    add interface and callable (factory) for the dexterity behavior
-    framework, and be done with it.
+    tl;dr: Ouroboros.  Also I needed better decoupling.
 
-    tl;dr: Ouroboros.
+    The correct behavior becomes obvious: define a dedicated interface
+    (``IStorageEnabler``) to act as the enabler for this dexterity
+    behavior, and restore ``IStorageEnabled`` back to the "soft" marker
+    interface once again.
   -->
 
   <plone:behavior
       title="Storage enabled"
       description="Enable the usage of repodono storage."
       provides=".storage.IStorageEnabler"
-      factory=".storage.StorageEnabler"
+      factory="..base.StorageFactory"
+      marker="..interfaces.IStorageEnabled"
       />
 
   <!--
-    Naturally, the underlying storage will need to be instantiated
-    after the object has been successfully created, so here is the
-    subscriber of the event for that.  ``StorageEnabler`` will have to
-    manually make context to provide the IStorageEnabled interface.
+    Naturally, the underlying storage will need to be instantiated after
+    the object's creation; here is the subscriber to achieve that.  Note
+    the interface that it's for.
   -->
 
   <subscriber
-      for=".storage.IStorageEnabled
+      for="..interfaces.IStorageEnabled
            zope.lifecycleevent.interfaces.IObjectCreatedEvent"
       handler=".storage.StorageCreate"
       />
