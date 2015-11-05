@@ -1,5 +1,5 @@
-Storage behavior
-================
+Base Storage behavior
+=====================
 
 Make up a storage_enabled content type::
 
@@ -11,54 +11,61 @@ Make up a storage_enabled content type::
     >>> portal.portal_types._setObject('storage_enabled', fti)
     'storage_enabled'
 
-Setup a test browser::
+If the create factory was manually invoked without any default values,
+it should still result in the creation of the item, albeit with a lack
+of an instantiated backend::
 
-    >>> from plone.app.testing import TEST_USER_ID, TEST_USER_NAME, TEST_USER_PASSWORD, setRoles
+    >>> portal.invokeFactory('storage_enabled', 'storage_enabled')
+    'storage_enabled'
+    >>> portal['storage_enabled']
+    <Item ...>
+
+Also, the factory (backend) will be unassigned::
+
+    >>> from zope.annotation.interfaces import IAnnotations
+    >>> IAnnotations(portal.storage_enabled).get(
+    ...     'repodono.storage.base.StorageFactory')
+
+This ties in with how a site with a type that has the storage behavior
+enabled but lacking a storage backend.  First setup a test browser::
+
+    >>> from plone.app.testing import TEST_USER_ID, TEST_USER_NAME
+    >>> from plone.app.testing import TEST_USER_PASSWORD, setRoles
     >>> setRoles(portal, TEST_USER_ID, ['Manager'])
     >>> import transaction; transaction.commit()
     >>> from plone.testing.z2 import Browser
     >>> browser = Browser(layer['app'])
-    >>> browser.addHeader('Authorization', 'Basic %s:%s' % (TEST_USER_NAME, TEST_USER_PASSWORD,))
+    >>> browser.addHeader('Authorization', 'Basic %s:%s' %
+    ...     (TEST_USER_NAME, TEST_USER_PASSWORD,))
 
-Try to add storage_enabled content::
+Open up the page for adding a storage_enabled content::
 
     >>> browser.open('http://nohost/plone/++add++storage_enabled')
 
 Check the backend options::
 
     >>> backends = browser.getControl('Backend')
-    >>> backends.options
-    ['dummy_backend']
+    Traceback (most recent call last):
+    ...
+    LookupError: label 'Backend'
 
-Now select the dummy and add::
+The backend widget should be disabled via read-only mode.  This avoids
+problems with handling of this read-only field under normal circumstance
+where a backend is available.  The read-only value should render::
 
-    >>> backends.value
-    ['dummy_backend']
+    >>> print(browser.contents)  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    ...
+    <BLANKLINE>
+    ...<span...>&lt;no choices are available&gt;</span>...
+    ...
+
+Naturally, actually saving the object should not be impeded, as
+mentioned.  Implementations of this feature could allow an uninstantiated
+backend to exist.
+
     >>> browser.getControl('Save').click()
     >>> browser.url
     'http://nohost/plone/storage_enabled/view'
 
-Inspect the underlying object to see that the marker interfaces and the
-annotation is set correctly::
-
-    >>> from zope.annotation.interfaces import IAnnotations
-    >>> IAnnotations(portal.storage_enabled)[
-    ...     'repodono.storage.base.StorageFactory']
-    {'backend': u'dummy_backend'}
-    >>> from repodono.storage.interfaces import IStorageEnabled
-    >>> from repodono.storage.interfaces import IStorageFactory
-    >>> IStorageEnabled.providedBy(portal.storage_enabled)
-    True
-    >>> IStorageFactory(portal.storage_enabled)
-    <repodono.storage.base.StorageFactory object at ...>
-
-Should be possible to adapt directly to a storage::
-
-    >>> from repodono.storage.interfaces import IStorage
-    >>> IStorage(portal.storage_enabled)
-    <repodono.storage.testing.storage.DummyStorage object at ...>
-
-TODO:
-- Need to do one that doesn't have the dummies installed (i.e. without
-  ANY defined storage, what are the error/failure case there).
-- Need to repeat this test using IWorkspace as its schema contains id.
+A more sensible way might just allow this field to be not required, but
+will need more support code that needs to be done.
