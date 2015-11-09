@@ -188,3 +188,25 @@ class IStorageInstaller(Interface):
     """
     Marker interface for storage installer utility.
     """
+
+
+class IStorageRegistry(Interface):
+    """
+    Interface for the fields to be registered into the Plone Registry
+    """
+
+    # TODO figure out the datatype, and figure out whether it is a good
+    # idea to create another vocabulary just for this if Choice is used.
+
+    active_backends = schema.Text(
+        title=_(u'Active Storage Backends'),
+        required=False,
+    )
+
+    backend_root = schema.TextLine(
+        title=_(u'Backend root.'),
+        description=_(
+            u'The root directory that is used for the filesystem root tool.'
+        ),
+        required=False,
+    )
