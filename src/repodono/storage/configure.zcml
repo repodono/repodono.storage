@@ -12,6 +12,7 @@
   <include file="base.zcml" />
   <include package=".behavior" />
   <include package=".browser" />
+  <include file="subscriber.zcml" />
   <include file="vocab.zcml" />
 
   <genericsetup:registerProfile

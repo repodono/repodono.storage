@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """Setup tests for this package."""
-from repodono.storage.testing import REPODONO_STORAGE_INTEGRATION_TESTING  # noqa
+import os
+from repodono.storage.testing import REPODONO_STORAGE_INTEGRATION_TESTING
+from zope.component import getUtility
 from plone import api
+from plone.registry.interfaces import IRegistry
 
 import unittest
 
@@ -25,6 +28,14 @@ class TestSetup(unittest.TestCase):
         from repodono.storage.interfaces import IRepodonoStorageLayer
         from plone.browserlayer import utils
         self.assertIn(IRepodonoStorageLayer, utils.registered_layers())
+
+    def test_registery_backend_root(self):
+        """Test the backend_root registry settings."""
+        registry = getUtility(IRegistry)
+        self.assertEqual(
+            registry['repodono.storage.backend_root'],
+            os.environ['CLIENT_HOME'],
+        )
 
 
 class TestUninstall(unittest.TestCase):
