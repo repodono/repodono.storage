@@ -36,6 +36,14 @@ class TestSetup(unittest.TestCase):
             registry['repodono.storage.backend_root'],
             os.environ['CLIENT_HOME'],
         )
+        # Modification.
+        registry['repodono.storage.backend_root'] = u'/tmp'
+        # Add-on reinstallation should not overwrite existing value.
+        self.installer.reinstallProducts(['repodono.storage'])
+        self.assertEqual(
+            registry['repodono.storage.backend_root'],
+            u'/tmp',
+        )
 
 
 class TestUninstall(unittest.TestCase):

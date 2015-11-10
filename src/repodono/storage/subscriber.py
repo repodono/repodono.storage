@@ -8,5 +8,5 @@ from repodono.storage.interfaces import IStorageRegistry
 
 @adapter(IStorageRegistry, IRecordAddedEvent)
 def set_default_backend_root(proxy, event):
-    if event.record.fieldName == 'backend_root':
+    if event.record.fieldName == 'backend_root' and event.record.value is None:
         event.record.value = unicode(os.environ.get('CLIENT_HOME'))
