@@ -53,6 +53,12 @@ class RepodonoDummyStorageLayer(PloneSandboxLayer):
     def setUpZope(self, app, configurationContext):
         self.loadZCML('testing.zcml', package=repodono.storage.testing)
 
+    def setUpPloneSite(self, portal):
+        # as we do not have a meta.zcml for a statement that registers
+        # a storage backend, the backend has to be manually enabled.
+        from repodono.storage.utilities import enable_backend
+        enable_backend('dummy_backend')
+
 
 REPODONO_DUMMY_STORAGE_FIXTURE = RepodonoDummyStorageLayer()
 

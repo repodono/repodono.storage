@@ -8,6 +8,7 @@ from repodono.storage.interfaces import IStorageFactory
 from repodono.storage.interfaces import IStorageInfo
 from repodono.storage.base import BaseStorageBackend
 from repodono.storage.base import BaseStorage
+from repodono.storage import utilities
 
 from plone.app.contenttypes.tests.robot.variables import TEST_FOLDER_ID
 
@@ -88,6 +89,9 @@ class StorageFactoryRegisteredTestCase(unittest.TestCase):
             self.backend, provided=IStorageBackend, name=u'dummy_a')
         self.portal.getSiteManager().registerUtility(
             self.backend, provided=IStorageBackend, name=u'dummy_b')
+
+        utilities.enable_backend('dummy_a')
+        utilities.enable_backend('dummy_b')
 
     def tearDown(self):
         self.portal.getSiteManager().unregisterUtility(

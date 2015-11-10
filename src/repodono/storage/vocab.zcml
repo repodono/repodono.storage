@@ -4,7 +4,13 @@
 
   <utility
       provides="zope.schema.interfaces.IVocabularyFactory"
-      factory=".vocab.StorageBackendVocabFactory"
+      factory=".vocab.StorageBackendAvailableVocabFactory"
+      name="repodono.storage.available_backends"
+      />
+
+  <utility
+      provides="zope.schema.interfaces.IVocabularyFactory"
+      factory=".vocab.StorageBackendEnabledVocabFactory"
       name="repodono.storage.backends"
       />
 

@@ -198,9 +198,16 @@ class IStorageRegistry(Interface):
     # TODO figure out the datatype, and figure out whether it is a good
     # idea to create another vocabulary just for this if Choice is used.
 
-    active_backends = schema.Text(
-        title=_(u'Active Storage Backends'),
-        required=False,
+    enabled_backends = schema.List(
+        title=_(u'Enabled repodono backends'),
+        description=_(
+            u'Repodono storage backends that are available for users.'
+        ),
+        required=True,
+        value_type=schema.Choice(
+            vocabulary='repodono.storage.available_backends',
+        ),
+        default=[],
     )
 
     backend_root = schema.TextLine(
