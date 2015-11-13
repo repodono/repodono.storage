@@ -43,6 +43,7 @@ setup(
         'plone.api',
         'setuptools',
         'z3c.jbot',
+        'repodono.registry',
     ],
     extras_require={
         'test': [

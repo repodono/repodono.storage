@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 from zope.interface import alsoProvides
+from zope.component import getUtility
 from zope.schema.interfaces import ConstraintNotSatisfied
 from zope.annotation.interfaces import IAnnotations
+
+from repodono.registry.interfaces import IUtilityRegistry
 from repodono.storage.interfaces import IStorageBackend
 from repodono.storage.interfaces import IStorageEnabled
 from repodono.storage.interfaces import IStorageFactory
 from repodono.storage.interfaces import IStorageInfo
 from repodono.storage.base import BaseStorageBackend
 from repodono.storage.base import BaseStorage
-from repodono.storage import utilities
 
 from plone.app.contenttypes.tests.robot.variables import TEST_FOLDER_ID
 
@@ -90,8 +92,9 @@ class StorageFactoryRegisteredTestCase(unittest.TestCase):
         self.portal.getSiteManager().registerUtility(
             self.backend, provided=IStorageBackend, name=u'dummy_b')
 
-        utilities.enable_backend('dummy_a')
-        utilities.enable_backend('dummy_b')
+        utilities = getUtility(IUtilityRegistry, 'repodono.storage.backends')
+        utilities.enable('dummy_a')
+        utilities.enable('dummy_b')
 
     def tearDown(self):
         self.portal.getSiteManager().unregisterUtility(

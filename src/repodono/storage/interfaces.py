@@ -195,21 +195,6 @@ class IStorageRegistry(Interface):
     Interface for the fields to be registered into the Plone Registry
     """
 
-    # TODO figure out the datatype, and figure out whether it is a good
-    # idea to create another vocabulary just for this if Choice is used.
-
-    enabled_backends = schema.List(
-        title=_(u'Enabled repodono backends'),
-        description=_(
-            u'Repodono storage backends that are available for users.'
-        ),
-        required=True,
-        value_type=schema.Choice(
-            vocabulary='repodono.storage.available_backends',
-        ),
-        default=[],
-    )
-
     backend_root = schema.TextLine(
         title=_(u'Backend root.'),
         description=_(

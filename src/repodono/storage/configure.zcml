@@ -2,6 +2,7 @@
     xmlns="http://namespaces.zope.org/zope"
     xmlns:five="http://namespaces.zope.org/five"
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    xmlns:repodono="http://namespaces.physiomeproject.org/repodono"
     xmlns:i18n="http://namespaces.zope.org/i18n"
     i18n_domain="repodono.storage">
 
@@ -13,7 +14,13 @@
   <include package=".behavior" />
   <include package=".browser" />
   <include file="subscriber.zcml" />
-  <include file="vocab.zcml" />
+
+  <repodono:utilities
+      title="Backends available"
+      description="Backends to be made available to end-users"
+      interface=".interfaces.IStorageBackend"
+      name="repodono.storage.backends"
+      />
 
   <genericsetup:registerProfile
       name="default"

@@ -6,15 +6,15 @@ from zope.schema.interfaces import WrongContainedType
 
 from plone.registry.interfaces import IRegistry
 
+from repodono.registry.interfaces import IUtilityRegistry
 from repodono.storage.interfaces import IStorageBackend
 from repodono.storage.testing import REPODONO_STORAGE_INTEGRATION_TESTING
 from repodono.storage.testing.storage import DummyStorageBackend
-from repodono.storage import utilities
 
 import unittest
 
 
-class AblerBackendTestCase(unittest.TestCase):
+class StorageUtilityRegistryBackendTestCase(unittest.TestCase):
 
     layer = REPODONO_STORAGE_INTEGRATION_TESTING
 
@@ -23,35 +23,58 @@ class AblerBackendTestCase(unittest.TestCase):
 
     def test_base(self):
         vocab = queryUtility(
-            IVocabularyFactory, name='repodono.storage.backends')(None)
+            IVocabularyFactory,
+            name='repodono.storage.backends.available')(None)
         self.assertEqual(list(vocab), [])
 
-    def test_registered_enable_disable(self):
+        vocab = queryUtility(
+            IVocabularyFactory,
+            name='repodono.storage.backends')(None)
+        self.assertEqual(list(vocab), [])
+
+    def test_vocabulary_registry(self):
         getSiteManager().registerUtility(
             DummyStorageBackend(), IStorageBackend, name='dummy_storage')
 
         vocab = queryUtility(
-            IVocabularyFactory, name='repodono.storage.backends')(None)
+            IVocabularyFactory,
+            name='repodono.storage.backends.available')(None)
+        self.assertEqual(vocab.getTermByToken(
+            'dummy_storage').token, 'dummy_storage')
+
+        vocab = queryUtility(
+            IVocabularyFactory,
+            name='repodono.storage.backends')(None)
         self.assertEqual(list(vocab), [])
 
-        utilities.enable_backend('dummy_storage')
+        registry = queryUtility(IRegistry)
+        registry['repodono.storage.backends'] = ['dummy_storage']
+
+        vocab = queryUtility(
+            IVocabularyFactory,
+            name='repodono.storage.backends')(None)
+        self.assertEqual(vocab.getTermByToken(
+            'dummy_storage').token, 'dummy_storage')
+
+    def test_vocabulary_utilities(self):
+        getSiteManager().registerUtility(
+            DummyStorageBackend(), IStorageBackend, name='dummy_storage')
+
+        utilities = queryUtility(IUtilityRegistry, 'repodono.storage.backends')
+        utilities.enable('dummy_storage')
 
         vocab = queryUtility(
             IVocabularyFactory, name='repodono.storage.backends')(None)
         self.assertEqual(vocab.getTermByToken(
             'dummy_storage').token, 'dummy_storage')
 
-        utilities.enable_backend('dummy_storage')
-
-    def test_unregistered_enable_disable(self):
-        with self.assertRaises(WrongContainedType):
-            utilities.enable_backend('dummy_storage')
-
     def test_enabled_uninstalled(self):
         dsb = DummyStorageBackend()
         getSiteManager().registerUtility(
             dsb, IStorageBackend, name='dummy_storage')
-        utilities.enable_backend('dummy_storage')
+
+        utilities = queryUtility(IUtilityRegistry, 'repodono.storage.backends')
+        utilities.enable('dummy_storage')
 
         vocab = queryUtility(
             IVocabularyFactory, name='repodono.storage.backends')(None)
@@ -68,12 +91,11 @@ class AblerBackendTestCase(unittest.TestCase):
         # registry should be untouched at this point
         registry = queryUtility(IRegistry)
         self.assertEqual(
-            registry['repodono.storage.enabled_backends'], [u'dummy_storage'])
+            registry['repodono.storage.backends'], [u'dummy_storage'])
 
         # shouldn't break anything.
-        utilities.disable_backend('unrelated')
+        utilities.disable('unrelated')
         self.assertEqual(list(vocab), [])
 
         # The bad value is no longer stored.
-        self.assertEqual(
-            registry['repodono.storage.enabled_backends'], [])
+        self.assertEqual(registry['repodono.storage.backends'], [])

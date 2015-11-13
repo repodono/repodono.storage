@@ -4,4 +4,12 @@
       interface="repodono.storage.interfaces.IStorageRegistry"
       prefix="repodono.storage"
     />
+  <record name="repodono.storage.backends">
+    <field type="plone.registry.field.List">
+      <title>Backend choices</title>
+      <value_type type="plone.registry.field.Choice">
+        <vocabulary>repodono.storage.backends.available</vocabulary>
+      </value_type>
+    </field>
+  </record>
 </registry>

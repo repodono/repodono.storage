@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from zope.component import getUtility
 from plone.app.contenttypes.testing import PLONE_APP_CONTENTTYPES_FIXTURE
 from plone.app.robotframework.testing import REMOTE_LIBRARY_BUNDLE_FIXTURE
 from plone.app.testing import applyProfile
@@ -7,6 +8,7 @@ from plone.app.testing import IntegrationTesting
 from plone.app.testing import PloneSandboxLayer
 from plone.testing import z2
 
+from repodono.registry.interfaces import IUtilityRegistry
 import repodono.storage
 
 
@@ -54,10 +56,10 @@ class RepodonoDummyStorageLayer(PloneSandboxLayer):
         self.loadZCML('testing.zcml', package=repodono.storage.testing)
 
     def setUpPloneSite(self, portal):
-        # as we do not have a meta.zcml for a statement that registers
-        # a storage backend, the backend has to be manually enabled.
-        from repodono.storage.utilities import enable_backend
-        enable_backend('dummy_backend')
+        u = getUtility(IUtilityRegistry, 'repodono.storage.backends')
+        # XXX need a test without make this a unicode for schema
+        # verification purposes.
+        u.enable(u'dummy_backend')
 
 
 REPODONO_DUMMY_STORAGE_FIXTURE = RepodonoDummyStorageLayer()
