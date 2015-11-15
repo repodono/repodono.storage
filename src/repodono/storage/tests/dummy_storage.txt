@@ -61,6 +61,4 @@ Should be possible to adapt directly to a storage::
     <repodono.storage.testing.storage.DummyStorage object at ...>
 
 TODO:
-- Need to do one that doesn't have the dummies installed (i.e. without
-  ANY defined storage, what are the error/failure case there).
 - Need to repeat this test using IWorkspace as its schema contains id.

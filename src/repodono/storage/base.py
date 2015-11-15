@@ -10,6 +10,11 @@ from .interfaces import IStorageFactory
 from .interfaces import IStorageInfo
 
 
+# TODO implement a null implementation for placeholder - a dummy that
+# provides no actual data that is returned when the real item cannot
+# be adapted, in the case where the package that supplied that
+# implementation was removed.
+
 @implementer(IStorage)
 class BaseStorage(object):
 
