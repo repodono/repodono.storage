@@ -2,7 +2,7 @@
 from zope.component import queryUtility
 from zope.component import getSiteManager
 from zope.schema.interfaces import IVocabularyFactory
-from zope.schema.interfaces import WrongContainedType
+# from zope.schema.interfaces import WrongContainedType
 
 from plone.registry.interfaces import IRegistry
 
