@@ -5,7 +5,7 @@ python:
 install:
   - virtualenv .
   - mkdir -p buildout-cache/{eggs,downloads}
-  - bin/pip install --no-deps -e git+https://github.com/repodono/repodono.registry.git#egg=repodo.registry
+  - bin/pip install --no-deps -e git+https://github.com/repodono/repodono.registry.git#egg=repodono.registry
   - bin/pip install zc.buildout
   - bin/buildout -Nc travis.cfg
 script:
