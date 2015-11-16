@@ -3,9 +3,10 @@ language: python
 python:
   - 2.7
 install:
+  - virtualenv .
   - mkdir -p buildout-cache/{eggs,downloads}
-  - pip install --no-deps -e git+https://github.com/repodono/repodono.registry.git#egg=repodo.registry
-  - pip install zc.buildout
+  - bin/pip install --no-deps -e git+https://github.com/repodono/repodono.registry.git#egg=repodo.registry
+  - bin/pip install zc.buildout
   - bin/buildout -Nc travis.cfg
 script:
   - bin/code-analysis
