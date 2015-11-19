@@ -77,6 +77,7 @@ class DummyStorageBackend(BaseStorageBackend):
         # one provided by context, especially since with pure dexterity
         # it can result in a newly created one that lacks one.
         id_ = unicode(context.id)
+
         try:
             info = IStorageInfo(context)
             info.path = id_

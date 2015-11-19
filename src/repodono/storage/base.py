@@ -197,7 +197,7 @@ def storage_installer(context, backend):
 
     # Initialize a storage factory for the context and assign a backend,
     # which must be valid (checking done via vocabulary schema).
-    # TODO explore usage of marker interface instead.
+
     storage_factory = IStorageFactory(context)
     storage_factory.backend = backend
     storage_factory.install_storage()

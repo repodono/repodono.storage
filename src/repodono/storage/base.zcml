@@ -13,11 +13,6 @@
       for="repodono.storage.interfaces.IStorageEnabled"
       factory="repodono.storage.base.StorageFactory" />
 
-  <!--
-    This is probably too general, might need more specific interface
-    than IAnnotatable
-  -->
-
   <adapter
       for="repodono.storage.interfaces.IStorageEnabled"
       provides="repodono.storage.interfaces.IStorage"

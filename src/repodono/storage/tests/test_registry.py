@@ -28,6 +28,3 @@ def test_suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(RegistryTestCase))
     return suite
-
-if __name__ == '__main__':
-    unittest.main()
