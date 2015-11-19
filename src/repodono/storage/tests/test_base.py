@@ -1,20 +1,28 @@
 # -*- coding: utf-8 -*-
+import shutil
+import tempfile
+import os.path
+
 from zope.interface import alsoProvides
 from zope.component import getUtility
 from zope.schema.interfaces import ConstraintNotSatisfied
 from zope.annotation.interfaces import IAnnotations
+from plone.registry.interfaces import IRegistry
 
 from repodono.registry.interfaces import IUtilityRegistry
 from repodono.storage.interfaces import IStorageBackend
 from repodono.storage.interfaces import IStorageEnabled
 from repodono.storage.interfaces import IStorageFactory
 from repodono.storage.interfaces import IStorageInfo
+from repodono.storage.interfaces import IStorageInstaller
 from repodono.storage.base import BaseStorageBackend
 from repodono.storage.base import BaseStorage
+from repodono.storage.base import DefaultStorageBackendFSAdapter
 
 from plone.app.contenttypes.tests.robot.variables import TEST_FOLDER_ID
 
 from repodono.storage.testing import REPODONO_STORAGE_INTEGRATION_TESTING
+from repodono.storage.testing import REPODONO_DUMMY_STORAGE_INTEGRATION_TESTING
 from repodono.storage.testing import storage
 
 import unittest
@@ -131,3 +139,56 @@ class StorageInfoTestCase(unittest.TestCase):
         self.assertIn(
             'repodono.storage.base.StorageInfo',
             IAnnotations(self.folder).keys())
+
+
+class DefaultStorageBackendFSAdapterTestCase(unittest.TestCase):
+
+    layer = REPODONO_STORAGE_INTEGRATION_TESTING
+
+    def setUp(self):
+        self.portal = self.layer['portal']
+        self.folder = self.portal.get(TEST_FOLDER_ID)
+        self.tempdir = unicode(tempfile.mkdtemp())
+        reg = getUtility(IRegistry)
+        reg['repodono.storage.backend_root'] = self.tempdir
+
+    def tearDown(self):
+        shutil.rmtree(self.tempdir)
+
+    def test_basics(self):
+        d = DefaultStorageBackendFSAdapter(None, self.portal)
+        self.assertEqual(d.get_root(), self.tempdir)
+        self.assertEqual(d._get_path(), os.path.join(self.tempdir, 'plone'))
+
+        target_dir = os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID)
+        d = DefaultStorageBackendFSAdapter(None, self.folder)
+        self.assertEqual(d._get_path(), target_dir)
+
+    def test_install(self):
+        target_dir = os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID)
+        d = DefaultStorageBackendFSAdapter(None, self.folder)
+        d.install()
+
+        self.assertEqual(
+            IStorageInfo(self.folder).path,
+            os.path.join('plone', TEST_FOLDER_ID),
+        )
+        self.assertTrue(os.path.exists(target_dir))
+
+    def test_acquire(self):
+        target_dir = os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID)
+        d = DefaultStorageBackendFSAdapter(None, self.folder)
+        with self.assertRaises(ValueError):
+            d.acquire()
+
+        d.install()
+        self.assertEqual(
+            IStorageInfo(self.folder).path,
+            os.path.join('plone', TEST_FOLDER_ID),
+        )
+        self.assertEqual(d.acquire(), target_dir)
+
+        # remove the target dir.
+        shutil.rmtree(target_dir)
+        with self.assertRaises(ValueError):
+            d.acquire()

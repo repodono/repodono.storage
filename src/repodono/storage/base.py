@@ -1,13 +1,21 @@
 # -*- coding: utf-8 -*-
+from os.path import join
+from os.path import exists
+from os import makedirs
+
 from zope.component import getUtility
+from zope.component import queryMultiAdapter
 from zope.interface import implementer
 from zope.schema.fieldproperty import FieldProperty
+from plone.registry.interfaces import IRegistry
 
 from .annotation import annotator
 from .interfaces import IStorage
 from .interfaces import IStorageBackend
+from .interfaces import IStorageBackendFSAdapter
 from .interfaces import IStorageFactory
 from .interfaces import IStorageInfo
+from .interfaces import IStorageRegistry
 
 
 # TODO implement a null implementation for placeholder - a dummy that
@@ -91,6 +99,10 @@ class StorageFactory(object):
 
     def install_storage(self):
         backend = self.get_storage_backend()
+        storage_backend_fs = queryMultiAdapter(
+            (backend, self.context), IStorageBackendFSAdapter)
+        if storage_backend_fs is not None:
+            storage_backend_fs.install()
         backend.install(self.context)
 
     def get_storage(self):
@@ -107,6 +119,70 @@ class StorageFactory(object):
 @annotator(IStorageInfo)
 class StorageInfo(object):
     pass
+
+
+@implementer(IStorageBackendFSAdapter)
+class DefaultStorageBackendFSAdapter(object):
+
+    def __init__(self, backend, context):
+        """
+        Constructor
+        """
+
+        self.backend = backend
+        self.context = context
+
+    def get_root(self):
+        """
+        Get the root directory associated with the manager.
+        """
+
+        registry = getUtility(IRegistry)
+        p = registry.forInterface(IStorageRegistry, prefix='repodono.storage')
+        return p.backend_root
+
+    def _get_path(self):
+        """
+        Helper method to resolve default path for the given context.
+        """
+
+        return join(self.get_root(), *self.context.getPhysicalPath())
+
+    def install(self):
+        """
+        Create a directory for the given context, and associate it to
+        the IStorageInfo annotation.
+
+        Subclasses can introduce more specific annotator.
+        """
+
+        info = IStorageInfo(self.context)
+
+        default = self._get_path()
+        # XXX if directory already exist, this should error
+        # TODO define a method to create a new directory (i.e. suffix)
+        makedirs(default)
+
+        info.path = join(*self.context.getPhysicalPath())
+
+    def acquire(self):
+        """
+        Acquire the name of the directory associated for the given
+        context.
+        """
+
+        subpath = IStorageInfo(self.context).path
+
+        if subpath is None:
+            raise ValueError('context has no IStorageInfo.path annotated.')
+
+        target = join(self.get_root(), subpath)
+
+        if not exists(target):
+            raise ValueError(
+                'Directory associated with context does not exists.')
+
+        return target
 
 
 def storage_installer(context, backend):

@@ -8,6 +8,13 @@
       name="dummy_backend"
       />
 
+  <adapter
+      for="repodono.storage.testing.storage.DummyFSStorageBackend
+           *"
+      factory="repodono.storage.base.DefaultStorageBackendFSAdapter"
+      provides="repodono.storage.interfaces.IStorageBackendFSAdapter"
+      />
+
   <!--
     Uncomment if this becomes a thing we need.
     <adapter factory="repodono.storage.testing.storage.DummyStorageInfo" />

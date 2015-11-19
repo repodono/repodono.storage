@@ -202,3 +202,26 @@ class IStorageRegistry(Interface):
         ),
         required=False,
     )
+
+
+class IStorageBackendFSAdapter(Interface):
+    """
+    An adapter that serves as a bridge between a given storage backend
+    and the filesystem.
+    """
+
+    def acquire():
+        """
+        Acquire the name of the directory associated for the given
+        context.
+        """
+
+    def get_root():
+        """
+        Get the root directory associated with the manager.
+        """
+
+    def install():
+        """
+        Create a directory for the given context.
+        """

@@ -7,9 +7,12 @@ from os.path import relpath
 from os import walk
 import json
 
+from zope.component import getMultiAdapter
+
 from repodono.storage.base import BaseStorageBackend
 from repodono.storage.base import BaseStorage
 from repodono.storage.interfaces import IStorageInfo
+from repodono.storage.interfaces import IStorageBackendFSAdapter
 
 from repodono.storage.exceptions import PathNotDirError
 from repodono.storage.exceptions import PathNotFoundError
@@ -274,12 +277,19 @@ class DummyFSStorageBackend(BaseStorageBackend):
     Dummy backend that provides direct access to file system contents.
     """
 
+    require_fs = True
+
     def acquire(self, context):
-        return DummyFSStorage(context)
+        fshelper = getMultiAdapter((self, context), IStorageBackendFSAdapter)
+        return DummyFSStorage(context, fshelper.acquire())
 
     def install(self, context):
-        pass
+        fshelper = getMultiAdapter((self, context), IStorageBackendFSAdapter)
+        fshelper.acquire()
 
 
 class DummyFSStorage(BaseStorage):
-    pass
+
+    def __init__(self, context, path):
+        super(DummyFSStorage, self).__init__(context)
+        self.path = path

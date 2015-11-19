@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
+import tempfile
+import shutil
 from os.path import join
 from os.path import dirname
+
 from zope.component import getUtility
 from zope.interface import alsoProvides
+from zope.annotation.interfaces import IAnnotations
 
+from plone.registry.interfaces import IRegistry
 from plone.dexterity.content import Item
+from plone.app.contenttypes.tests.robot.variables import TEST_FOLDER_ID
+
+from repodono.registry.interfaces import IUtilityRegistry
 
 from repodono.storage.exceptions import PathNotFoundError
 from repodono.storage.exceptions import PathNotDirError
@@ -250,18 +258,44 @@ class DummyStorageTestCase(unittest.TestCase):
 
 class DummyFSStorageBackendTestCase(unittest.TestCase):
 
+    layer = REPODONO_DUMMY_STORAGE_INTEGRATION_TESTING
+
     def setUp(self):
+        self.portal = self.layer['portal']
+        self.folder = self.portal.get(TEST_FOLDER_ID)
+
         self.backend = DummyFSStorageBackend()
+        self.tempdir = unicode(tempfile.mkdtemp())
+        reg = getUtility(IRegistry)
+        reg['repodono.storage.backend_root'] = self.tempdir
+
+        alsoProvides(self.folder, IStorageEnabled)
 
     def tearDown(self):
-        pass
+        shutil.rmtree(self.tempdir)
 
-    def test_basic(self):
-        # just to show that this works, for now.
-        item = Item(id='dummy_a')
-        self.backend.install(item)
-        storage = self.backend.acquire(item)
-        self.assertTrue(isinstance(storage, DummyFSStorage))
+    def test_storage_registry_backend_root_undefined(self):
+        self.assertNotIn(
+            'repodono.storage.base.StorageInfo',
+            IAnnotations(self.folder).keys())
+
+    def test_standard_fs_workflow(self):
+        # Register a backend that requires filesystem
+        self.portal.getSiteManager().registerUtility(
+            self.backend, provided=IStorageBackend, name=u'dummy_fs_backend')
+        utilities = getUtility(IUtilityRegistry, 'repodono.storage.backends')
+        utilities.enable('dummy_fs_backend')
+
+        installer = getUtility(IStorageInstaller)
+        installer(self.folder, 'dummy_fs_backend')
+
+        self.assertIn(
+            'repodono.storage.base.StorageInfo',
+            IAnnotations(self.folder).keys())
+
+        storage = IStorage(self.folder)
+        self.assertEqual(
+            storage.path, join(self.tempdir, 'plone', TEST_FOLDER_ID))
 
 
 class DummyStorageIntegrationTestCase(unittest.TestCase):
