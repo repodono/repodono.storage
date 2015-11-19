@@ -27,7 +27,6 @@ from repodono.storage.interfaces import IStorageInstaller
 
 from repodono.storage.testing import REPODONO_DUMMY_STORAGE_INTEGRATION_TESTING
 from repodono.storage.testing import storage
-from repodono.storage.testing.storage import DummyFSStorage
 from repodono.storage.testing.storage import DummyFSStorageBackend
 from repodono.storage.testing.storage import DummyStorage
 from repodono.storage.testing.storage import DummyStorageBackend

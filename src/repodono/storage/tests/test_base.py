@@ -14,7 +14,6 @@ from repodono.storage.interfaces import IStorageBackend
 from repodono.storage.interfaces import IStorageEnabled
 from repodono.storage.interfaces import IStorageFactory
 from repodono.storage.interfaces import IStorageInfo
-from repodono.storage.interfaces import IStorageInstaller
 from repodono.storage.base import BaseStorageBackend
 from repodono.storage.base import BaseStorage
 from repodono.storage.base import DefaultStorageBackendFSAdapter
@@ -22,7 +21,6 @@ from repodono.storage.base import DefaultStorageBackendFSAdapter
 from plone.app.contenttypes.tests.robot.variables import TEST_FOLDER_ID
 
 from repodono.storage.testing import REPODONO_STORAGE_INTEGRATION_TESTING
-from repodono.storage.testing import REPODONO_DUMMY_STORAGE_INTEGRATION_TESTING
 from repodono.storage.testing import storage
 
 import unittest
