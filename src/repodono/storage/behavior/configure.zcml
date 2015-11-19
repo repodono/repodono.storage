@@ -96,7 +96,7 @@
   <subscriber
       for="..interfaces.IStorageEnabled
            zope.lifecycleevent.interfaces.IObjectCreatedEvent"
-      handler=".storage.StorageCreate"
+      handler=".storage.install_storage"
       />
 
 </configure>

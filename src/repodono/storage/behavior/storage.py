@@ -78,9 +78,10 @@ class IStorageEnabler(model.Schema):
     directives.widget(backend=DisplayIfEmptySelectFieldWidget)
 
 
-def StorageCreate(obj, event):
+def install_storage(obj, event):
     """
-    The companion factory for the above behavior interface.
+    The event handler for installing and associating a storage to an
+    ``IStorageEnabled`` object.
     """
 
     factory = IStorageFactory(obj)
