@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 from os.path import join
 from os.path import exists
+from os.path import split
+from os import listdir
 from os import makedirs
+import re
 
 from zope.component import getUtility
 from zope.component import queryMultiAdapter
@@ -124,6 +127,8 @@ class StorageInfo(object):
 @implementer(IStorageBackendFSAdapter)
 class DefaultStorageBackendFSAdapter(object):
 
+    makedir_retry = 10
+
     def __init__(self, backend, context):
         """
         Constructor
@@ -148,6 +153,42 @@ class DefaultStorageBackendFSAdapter(object):
 
         return join(self.get_root(), *self.context.getPhysicalPath())
 
+    def find_next_path(self, path):
+        dirn, basen = split(path)
+        dirs = listdir(dirn)
+        return join(dirn, self._find_next_path(dirs, basen))
+
+    def _find_next_path(self, names, basen):
+        def split(p):
+            x, i = p.rsplit('-', 1)
+            return x, int(i)
+
+        def unsplit_next(x, i):
+            return x + '-' + str(i + 1)
+
+        pattern = re.compile('^%s-[0-9]+$' % basen)
+        paths = sorted((split(n) for n in names if pattern.match(n)),
+                       key=lambda x: x[1])
+        if paths:
+            return unsplit_next(*paths[-1])
+        # start the number.
+        return basen + '-1'
+
+    def _makedirs(self, path):
+        count = self.makedir_retry
+        next_path = path
+
+        while count >= 0:
+            try:
+                makedirs(next_path)
+            except OSError:
+                next_path = self.find_next_path(path)
+            else:
+                return True
+            count -= 1
+
+        raise ValueError('Failed to make a dir')
+
     def install(self):
         """
         Create a directory for the given context, and associate it to
@@ -159,9 +200,7 @@ class DefaultStorageBackendFSAdapter(object):
         info = IStorageInfo(self.context)
 
         default = self._get_path()
-        # XXX if directory already exist, this should error
-        # TODO define a method to create a new directory (i.e. suffix)
-        makedirs(default)
+        self._makedirs(default)
 
         info.path = join(*self.context.getPhysicalPath())
 

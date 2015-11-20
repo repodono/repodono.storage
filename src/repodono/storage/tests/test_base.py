@@ -173,6 +173,20 @@ class DefaultStorageBackendFSAdapterTestCase(unittest.TestCase):
         )
         self.assertTrue(os.path.exists(target_dir))
 
+    def test_install_exists(self):
+        target_dir = os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID)
+        os.makedirs(target_dir)
+        d = DefaultStorageBackendFSAdapter(None, self.folder)
+        d.install()
+
+        self.assertEqual(
+            IStorageInfo(self.folder).path,
+            os.path.join('plone', TEST_FOLDER_ID),
+        )
+        self.assertTrue(os.path.exists(target_dir + '-1'))
+        # doesn't go ahead and create extra directories.
+        self.assertFalse(os.path.exists(target_dir + '-2'))
+
     def test_acquire(self):
         target_dir = os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID)
         d = DefaultStorageBackendFSAdapter(None, self.folder)
@@ -190,3 +204,43 @@ class DefaultStorageBackendFSAdapterTestCase(unittest.TestCase):
         shutil.rmtree(target_dir)
         with self.assertRaises(ValueError):
             d.acquire()
+
+    def test__find_next_path(self):
+        d = DefaultStorageBackendFSAdapter(None, self.folder)
+        names = [
+            'a', 'b', 'c', 'c-1', 'c-1-1', 'c-12-1', 'c-1-2', 'c-1-2a', 'c-2',
+            'c-1-3', 'c-1-5', 'd-1', 'e', 'cd-11111', 'b-1',
+        ]
+        self.assertEqual(d._find_next_path(names, 'a'), 'a-1')
+        self.assertEqual(d._find_next_path(names, 'b'), 'b-2')
+        self.assertEqual(d._find_next_path(names, 'c-1'), 'c-1-6')
+        self.assertEqual(d._find_next_path(names, 'c-12'), 'c-12-2')
+        self.assertEqual(d._find_next_path(names, 'c-12-1'), 'c-12-1-1')
+        self.assertEqual(d._find_next_path(names, 'cd'), 'cd-11112')
+
+    def test__makedirs(self):
+        target_dir = os.path.join(self.tempdir, 'dummy')
+        d = DefaultStorageBackendFSAdapter(None, self.folder)
+        self.assertFalse(os.path.exists(target_dir))
+        d._makedirs(target_dir)
+        self.assertTrue(os.path.exists(target_dir))
+
+        self.assertFalse(os.path.exists(target_dir + '-1'))
+        d._makedirs(target_dir)
+        self.assertTrue(os.path.exists(target_dir + '-1'))
+
+        self.assertFalse(os.path.exists(target_dir + '-2'))
+        d._makedirs(target_dir)
+        self.assertTrue(os.path.exists(target_dir + '-2'))
+
+        self.assertFalse(os.path.exists(target_dir + '-3'))
+        d._makedirs(target_dir)
+        self.assertTrue(os.path.exists(target_dir + '-3'))
+
+        d.makedir_retry = 0
+        with self.assertRaises(ValueError):
+            d._makedirs(target_dir)
+
+        self.assertFalse(os.path.exists(target_dir + '-a'))
+        d._makedirs(target_dir + '-a')
+        self.assertTrue(os.path.exists(target_dir + '-a'))
