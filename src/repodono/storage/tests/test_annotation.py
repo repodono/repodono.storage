@@ -38,7 +38,9 @@ class Dummy2(object):
 
 class IDummy3(IDummy):
     def foo():
-        pass
+        """
+        Dummy method
+        """
 
 
 @annotator(IDummy3)
@@ -46,7 +48,9 @@ class Dummy3(object):
     field2 = schema.fieldproperty.FieldProperty(IDummy3['field2'])
 
     def foo(self):
-        pass
+        """
+        Dummy method
+        """
 
 
 class IDummy4(Interface):
