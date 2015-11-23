@@ -3,6 +3,7 @@ import tempfile
 import shutil
 from os.path import join
 from os.path import dirname
+from os.path import exists
 
 from zope.component import getUtility
 from zope.interface import alsoProvides
@@ -295,6 +296,7 @@ class DummyFSStorageBackendTestCase(unittest.TestCase):
         storage = IStorage(self.folder)
         self.assertEqual(
             storage.path, join(self.tempdir, 'plone', TEST_FOLDER_ID))
+        self.assertTrue(exists(storage.path))
 
 
 class DummyStorageIntegrationTestCase(unittest.TestCase):
