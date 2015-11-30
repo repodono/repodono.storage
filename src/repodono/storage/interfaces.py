@@ -102,6 +102,13 @@ class IStorage(Interface):
         required=True,
     )
 
+    # Should be a read-only property.
+    shortrev = schema.TextLine(
+        title=_(u'Current Short Revision'),
+        description=_(u'The currently active revision, short representation.'),
+        required=True,
+    )
+
     def basename(path):
         """
         Return the basename of the given path.
