@@ -162,6 +162,11 @@ class DummyStorage(BaseStorage):
     def rev(self):
         return str(self._rev)
 
+    @property
+    def shortrev(self):
+        # no such thing for dummy but this is required.
+        return self.rev
+
     def basename(self, path):
         return path.rsplit('/')[-1]
 

@@ -97,6 +97,7 @@ class DummyStorageTestCase(unittest.TestCase):
         storage = self.backend.acquire(item)
         self.assertEqual(item, storage.context)
         self.assertEqual(storage.rev, '3')
+        self.assertEqual(storage.shortrev, '3')
         self.assertEqual(
             storage.file('file1'), 'file2-rev0\nThis is also a test file.\n')
         self.assertEqual(
