@@ -11,5 +11,6 @@
         <vocabulary>repodono.storage.backends.available</vocabulary>
       </value_type>
     </field>
+    <value purge="false"></value>
   </record>
 </registry>
