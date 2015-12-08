@@ -60,5 +60,77 @@ Should be possible to adapt directly to a storage::
     >>> IStorage(portal.storage_enabled)
     <repodono.storage.testing.storage.DummyStorage object at ...>
 
-TODO:
-- Need to repeat this test using IWorkspace as its schema contains id.
+Filesystem integration
+----------------------
+
+The factory will also try to adapt a IStorageBackendFSAdapter for the
+backend used and the freshly added item.  The default implementation
+creates a directory within the allocated backend_root registry setting.
+
+First set up the working directory and assign it to the registry key, and
+register the DummyFSStorageBackend as one of the available backends::
+
+    >>> import tempfile
+    >>> from zope.component import getUtility
+    >>> from plone.registry.interfaces import IRegistry
+    >>> workdir = unicode(tempfile.mkdtemp())
+    >>> reg = getUtility(IRegistry)
+    >>> reg['repodono.storage.backend_root'] = workdir
+
+    >>> from repodono.registry.interfaces import IUtilityRegistry
+    >>> from repodono.storage.interfaces import IStorageBackend
+    >>> from repodono.storage.testing.storage import DummyFSStorageBackend
+    >>> fs_backend = DummyFSStorageBackend()
+    >>> portal.getSiteManager().registerUtility(
+    ...     fs_backend, provided=IStorageBackend, name=u'dummy_fs_backend')
+    >>> u = getUtility(IUtilityRegistry, 'repodono.storage.backends')
+    >>> u.enable(u'dummy_fs_backend')
+    >>> import transaction
+    >>> transaction.commit()
+
+Once again. check that it's available for usage from the add form::
+
+    >>> browser.open('http://nohost/plone/++add++storage_enabled')
+    >>> backends = browser.getControl('Backend')
+    >>> backends.options
+    ['dummy_backend', 'dummy_fs_backend']
+
+Like before, simply save the object.
+
+    >>> backends.value = ['dummy_fs_backend']
+    >>> browser.getControl('Save').click()
+    >>> browser.url
+    'http://nohost/plone/storage_enabled-1/view'
+
+This time though, check that the directory associated with the storage
+instance with the DummyFSStorageBackend selected has been created.
+
+    >>> from repodono.storage.interfaces import IStorageInfo
+    >>> from os.path import exists, join
+    >>> target_path = join(workdir, 'plone', 'storage_enabled-1')
+    >>> exists(target_path)
+    True
+    >>> IStorageInfo(portal['storage_enabled-1']).path == target_path
+    True
+
+Currently, moving the object via cut/paste (here done via plone.api)
+should _not_ result in the creation of a new directory as this is not
+currently implemented (the reason being is that IStorageInfo.path tracks
+this information separately for its context)::
+
+    >>> from plone.app.contenttypes.tests.robot.variables import TEST_FOLDER_ID
+    >>> from plone.api.content import move
+    >>> moved = move(portal['storage_enabled-1'], portal[TEST_FOLDER_ID])
+    >>> exists(join(workdir, 'plone', TEST_FOLDER_ID, 'storage_enabled-1'))
+    False
+    >>> exists(target_path)
+    True
+    >>> moved.aq_parent.id == TEST_FOLDER_ID
+    True
+    >>> IStorageInfo(moved).path == target_path
+    True
+
+Clean up by removing the temporary directory::
+
+    >>> import shutil
+    >>> shutil.rmtree(workdir)

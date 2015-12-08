@@ -89,13 +89,13 @@
 
   <!--
     Naturally, the underlying storage will need to be instantiated after
-    the object's creation; here is the subscriber to achieve that.  Note
-    the interface that it's for.
+    the created object has been _added_ to the context; here is the
+    subscriber to achieve that.  Note the interface that it's for.
   -->
 
   <subscriber
       for="..interfaces.IStorageEnabled
-           zope.lifecycleevent.interfaces.IObjectCreatedEvent"
+           zope.lifecycleevent.interfaces.IObjectAddedEvent"
       handler=".storage.install_storage"
       />
 

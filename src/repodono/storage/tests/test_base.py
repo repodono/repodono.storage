@@ -162,42 +162,39 @@ class DefaultStorageBackendFSAdapterTestCase(unittest.TestCase):
         d = DefaultStorageBackendFSAdapter(None, self.folder)
         self.assertEqual(d._get_path(), target_dir)
 
-    def test_install(self):
+    def test_install_default(self):
         target_dir = os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID)
         d = DefaultStorageBackendFSAdapter(None, self.folder)
         d.install()
 
-        self.assertEqual(
-            IStorageInfo(self.folder).path,
-            os.path.join('plone', TEST_FOLDER_ID),
-        )
+        self.assertEqual(IStorageInfo(self.folder).path, target_dir)
         self.assertTrue(os.path.exists(target_dir))
 
     def test_install_exists(self):
-        target_dir = os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID)
-        os.makedirs(target_dir)
+        # create blocking dir.
+        os.makedirs(os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID))
+
+        target_dir = os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID + '-1')
         d = DefaultStorageBackendFSAdapter(None, self.folder)
         d.install()
+        self.assertEqual(IStorageInfo(self.folder).path, target_dir)
+        self.assertTrue(os.path.exists(target_dir))
 
-        self.assertEqual(
-            IStorageInfo(self.folder).path,
-            os.path.join('plone', TEST_FOLDER_ID),
-        )
-        self.assertTrue(os.path.exists(target_dir + '-1'))
         # doesn't go ahead and create extra directories.
-        self.assertFalse(os.path.exists(target_dir + '-2'))
+        self.assertFalse(os.path.exists(
+            os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID + '-2')))
 
-    def test_acquire(self):
-        target_dir = os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID)
+    def test_acquire_failure(self):
         d = DefaultStorageBackendFSAdapter(None, self.folder)
         with self.assertRaises(ValueError):
             d.acquire()
 
+    def test_acquire_success(self):
+        d = DefaultStorageBackendFSAdapter(None, self.folder)
         d.install()
-        self.assertEqual(
-            IStorageInfo(self.folder).path,
-            os.path.join('plone', TEST_FOLDER_ID),
-        )
+
+        target_dir = os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID)
+        self.assertEqual(IStorageInfo(self.folder).path, target_dir)
         self.assertEqual(d.acquire(), target_dir)
 
         # remove the target dir.

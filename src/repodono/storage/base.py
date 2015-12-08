@@ -176,15 +176,15 @@ class DefaultStorageBackendFSAdapter(object):
 
     def _makedirs(self, path):
         count = self.makedir_retry
-        next_path = path
+        target_path = path
 
         while count >= 0:
             try:
-                makedirs(next_path)
+                makedirs(target_path)
             except OSError:
-                next_path = self.find_next_path(path)
+                target_path = self.find_next_path(path)
             else:
-                return True
+                return target_path
             count -= 1
 
         raise ValueError('Failed to make a dir')
@@ -200,9 +200,7 @@ class DefaultStorageBackendFSAdapter(object):
         info = IStorageInfo(self.context)
 
         default = self._get_path()
-        self._makedirs(default)
-
-        info.path = join(*self.context.getPhysicalPath())
+        info.path = self._makedirs(default)
 
     def acquire(self):
         """
