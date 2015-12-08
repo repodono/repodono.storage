@@ -198,6 +198,8 @@ class DefaultStorageBackendFSAdapter(object):
         """
 
         info = IStorageInfo(self.context)
+        if info.path:
+            return  # it has one assigned already, don't overwrite it.
 
         default = self._get_path()
         info.path = self._makedirs(default)

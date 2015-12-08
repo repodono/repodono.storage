@@ -170,6 +170,15 @@ class DefaultStorageBackendFSAdapterTestCase(unittest.TestCase):
         self.assertEqual(IStorageInfo(self.folder).path, target_dir)
         self.assertTrue(os.path.exists(target_dir))
 
+    def test_install_multiple_ignored(self):
+        target_dir = os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID)
+        d = DefaultStorageBackendFSAdapter(None, self.folder)
+        d.install()
+        d.install()
+
+        self.assertEqual(IStorageInfo(self.folder).path, target_dir)
+        self.assertTrue(os.path.exists(target_dir))
+
     def test_install_exists(self):
         # create blocking dir.
         os.makedirs(os.path.join(self.tempdir, 'plone', TEST_FOLDER_ID))
