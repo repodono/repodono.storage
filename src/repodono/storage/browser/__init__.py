@@ -57,18 +57,26 @@ FileBrain = namedtuple('FileBrain', attributes)
 
 
 @implementer(IPublishTraverse)
-class StorageVocabularyView(BrowserView):
+class StorageBrowserView(BrowserView):
 
-    # defaults
-    parentview_name = 'storage_contents'
     commit = None
-    subpath = None  # needs overriding to []
+    view_name = None
 
     def __init__(self, *a, **kw):
-        super(StorageVocabularyView, self).__init__(*a, **kw)
+        super(StorageBrowserView, self).__init__(*a, **kw)
         self.subpath = []
+        self.view_name = self.view_name or self.__name__
         self.view_url = '/'.join(
-            (self.context.absolute_url(), self.parentview_name))
+            (self.context.absolute_url(), self.view_name))
+
+    def get_path(self, filepath):
+        return '/'.join([self.commit, filepath])
+
+    def get_current_path(self):
+        return '/'.join(['', self.commit] + self.subpath)
+
+    def get_url(self, filepath):
+        return '/'.join([self.view_url, self.commit, filepath])
 
     def publishTraverse(self, request, name):
         if self.commit is None:
@@ -77,8 +85,14 @@ class StorageVocabularyView(BrowserView):
             self.subpath.append(name)
         return self
 
-    def get_url(self, filepath):
-        return '/'.join([self.view_url, self.commit, filepath])
+
+class StorageVocabularyView(StorageBrowserView):
+
+    # this references the **parent** view_name as the URLs ultimately
+    # gets consumed/presented by that.
+    view_name = 'storage_contents'
+    commit = None
+    subpath = None  # needs overriding to []
 
     def get_items(self):
         storage = IStorage(self.context)
@@ -127,7 +141,7 @@ class StorageVocabularyView(BrowserView):
 
 
 @implementer(IFolderContentsView)
-class StorageContentsView(BrowserView):
+class StorageContentsView(StorageBrowserView):
 
     def get_actions(self):
         actions = []
@@ -149,6 +163,8 @@ class StorageContentsView(BrowserView):
             'vocabularyUrl': base_vocabulary,
             'pushStateUrl': push_state_url,
             'traverseView': True,
+            # TODO verify that get_url result in a valid location dir.
+            'traverseSubpath': self.get_current_path(),
             'urlStructure': {
                 'base': base_url + '/storage_contents',
                 'appended': ''

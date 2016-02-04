@@ -12,7 +12,7 @@ define([
       this.options = options;
       this.view = options.view;
       this.url = options.url;
-      this.path = '/';
+      this.path = options.view.traverseSubpath || '/';
 
       Backbone.Paginator.requestPager.prototype.initialize.apply(this, [models, options]);
     },
