@@ -46,7 +46,7 @@ attributes = [
     'is_folderish',  # structure-pattern: to show that this is a folder
     'portal_type',  # structure-pattern: for the icon
     'id',  # Backbone.Collection.get, unique id for bulk removal.
-    'UID',  # structure-pattern: collection select by UID methods.
+    'UID',  # structure-pattern: SelectionWellView template
     'path',  # structure-pattern: path
 ]
 
