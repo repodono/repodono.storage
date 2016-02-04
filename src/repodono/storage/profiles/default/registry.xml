@@ -13,4 +13,46 @@
     </field>
     <value purge="false"></value>
   </record>
+
+  <!--
+    When we need complicated css in the form of less
+
+  <records prefix="plone.resources/repodono.storage"
+           interface='Products.CMFPlone.interfaces.IResourceRegistry'>
+    <value key="css">
+      <element>++resource++repodono.storage/repodonostorage.less</element>
+    </value>
+  </records>
+  -->
+
+  <records prefix="plone.resources/repodonostorage-collection"
+            interface='Products.CMFPlone.interfaces.IResourceRegistry'>
+    <value key="js">++resource++repodono.storage/js/collection.js</value>
+  </records>
+
+  <records prefix="plone.resources/repodonostorage-navigation"
+            interface='Products.CMFPlone.interfaces.IResourceRegistry'>
+    <value key="js">++resource++repodono.storage/js/navigation.js</value>
+  </records>
+
+  <records prefix="plone.resources/repodonostorage"
+            interface='Products.CMFPlone.interfaces.IResourceRegistry'>
+    <value key="js">++resource++repodono.storage/repodonostorage.js</value>
+  </records>
+
+  <records prefix="plone.bundles/repodonostorage"
+            interface='Products.CMFPlone.interfaces.IBundleRegistry'>
+    <value key="resources">
+      <element>repodonostorage</element>
+    </value>
+    <!--
+      This is just the static CSS since we don't do any less (yet)
+    -->
+    <value key="enabled">True</value>
+    <value key="compile">True</value>
+    <value key="jscompilation">++resource++repodono.storage/repodonostorage-compiled.min.js</value>
+    <value key="csscompilation">++resource++repodono.storage/repodonostorage.css</value>
+    <value key="last_compilation"></value>
+  </records>
+
 </registry>
