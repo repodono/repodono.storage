@@ -17,4 +17,28 @@
       directory="static"
       />
 
+  <!-- File Listing -->
+
+  <browser:page
+      for="repodono.storage.interfaces.IStorageEnabled"
+      name="storage_contents"
+      class=".StorageContentsView"
+      template="templates/storage_contents.pt"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="repodono.storage.interfaces.IStorageEnabled"
+      name="getStorageVocabulary"
+      class=".StorageVocabularyView"
+      permission="zope2.View"
+      />
+
+  <browser:page
+      for="repodono.storage.interfaces.IStorageEnabled"
+      name="sc-contextInfo"
+      class=".StorageContextInfo"
+      permission="zope2.View"
+      />
+
 </configure>
