@@ -14,16 +14,12 @@
     <value purge="false"></value>
   </record>
 
-  <!--
-    When we need complicated css in the form of less
-
-  <records prefix="plone.resources/repodono.storage"
+  <records prefix="plone.resources/repodonostorage"
            interface='Products.CMFPlone.interfaces.IResourceRegistry'>
     <value key="css">
       <element>++resource++repodono.storage/repodonostorage.less</element>
     </value>
   </records>
-  -->
 
   <records prefix="plone.resources/repodonostorage-collection"
             interface='Products.CMFPlone.interfaces.IResourceRegistry'>
