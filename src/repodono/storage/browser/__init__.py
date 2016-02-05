@@ -1,32 +1,18 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 
-from AccessControl import Unauthorized
 from Acquisition import aq_inner
-from plone.app.content.browser.file import TUS_ENABLED
 from plone.app.content.browser.interfaces import IFolderContentsView
-from plone.app.content.interfaces import IStructureAction
 from plone.app.content.utils import json_dumps
-from plone.app.content.utils import json_loads
-from plone.app.content.browser.vocabulary import BaseVocabularyView
-from plone.app.content.browser.vocabulary import VocabularyView
-from plone.protect.postonly import check as checkpost
 from plone.uuid.interfaces import IUUID
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone import PloneMessageFactory as _
 from Products.CMFPlone import utils
 from Products.CMFPlone.interfaces import IPloneSiteRoot
 from Products.Five import BrowserView
-from zope.browsermenu.interfaces import IBrowserMenu
-from zope.component import getMultiAdapter
-from zope.component import getUtilitiesFor
-from zope.component import getUtility
-from zope.component.hooks import getSite
 from zope.i18n import translate
 from zope.interface import implementer
 from zope.publisher.interfaces import IPublishTraverse
-
-from zope.schema.vocabulary import SimpleTerm
 
 from repodono.storage.interfaces import IStorage
 
@@ -144,7 +130,7 @@ class StorageVocabularyView(StorageBrowserView):
 class StorageContentsView(StorageBrowserView):
 
     def get_actions(self):
-        actions = []
+        # actions = []
         # XXX returning a dummy with one item that does nothing because
         # there is no way to disable the action bar (can't override the
         # `demoButtons` that gets injected if `buttons` is empty.
@@ -158,7 +144,6 @@ class StorageContentsView(StorageBrowserView):
         base_url = self.context.absolute_url()
         base_vocabulary = '%s/@@getStorageVocabulary' % base_url
         push_state_url = '%s/storage_contents{path}' % base_url
-        context_path = self.context.getPhysicalPath()
         options = {
             'vocabularyUrl': base_vocabulary,
             'pushStateUrl': push_state_url,
