@@ -73,7 +73,7 @@ class StorageBrowserView(BrowserView):
         return '/'.join([self.commit, filepath])
 
     def get_current_path(self):
-        return '/'.join(['', self.commit] + self.subpath)
+        return '/'.join(['', self.commit or ''] + self.subpath)
 
     def get_url(self, filepath):
         return '/'.join([self.view_url, self.commit, filepath])
