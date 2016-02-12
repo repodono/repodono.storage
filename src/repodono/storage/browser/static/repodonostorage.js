@@ -2,9 +2,10 @@ require([
   'jquery',
   'pat-registry',
 
-  'repodonostorage-navigation',
-  'repodonostorage-collection'
-], function($, registry, Base) {
+  'repodonostorage-url/js/navigation',
+  'repodonostorage-url/js/collection',
+  'repodonostorage-url/js/actionmenu'
+], function($, registry) {
   'use strict';
 });
 

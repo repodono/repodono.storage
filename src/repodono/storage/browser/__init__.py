@@ -167,12 +167,12 @@ class StorageContentsView(StorageBrowserView):
             'upload': False,
             'rearrange': False,
             'buttons': self.get_actions(),
-            'menuOptions': [],
+            'menuGenerator': 'repodonostorage-url/js/actionmenu',
             'tableRowItemAction': {
                 # switch off the default navigation js method
                 'other': None,
             },
-            'collectionConstructor': 'repodonostorage-collection',
+            'collectionConstructor': 'repodonostorage-url/js/collection',
         }
         self.options = json_dumps(options)
         return super(StorageContentsView, self).__call__()
