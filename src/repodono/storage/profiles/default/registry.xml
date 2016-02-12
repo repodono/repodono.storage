@@ -1,9 +1,18 @@
 <?xml version="1.0"?>
 <registry>
+
+  <!--
+    Configuration for this module - refer to the interface.
+  -->
   <records
       interface="repodono.storage.interfaces.IStorageRegistry"
       prefix="repodono.storage"
     />
+
+  <!--
+    Vocabulary for backend availability.  Use by the repodono:registry
+    definition here this management infrastructure.
+  -->
   <record name="repodono.storage.backends">
     <field type="plone.registry.field.List">
       <title>Backend choices</title>
@@ -14,6 +23,9 @@
     <value purge="false"></value>
   </record>
 
+  <!--
+    Resource registry for the javascript and styling.
+  -->
   <records prefix="plone.resources/repodonostorage"
             interface='Products.CMFPlone.interfaces.IResourceRegistry'>
     <value key="js">++resource++repodono.storage/repodonostorage.js</value>
@@ -23,6 +35,9 @@
     </value>
   </records>
 
+  <!--
+    Bundle for the above so compilation can happen.
+  -->
   <records prefix="plone.bundles/repodonostorage"
             interface='Products.CMFPlone.interfaces.IBundleRegistry'>
     <value key="resources">
