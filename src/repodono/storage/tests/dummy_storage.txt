@@ -60,6 +60,35 @@ Should be possible to adapt directly to a storage::
     >>> IStorage(portal.storage_enabled)
     <repodono.storage.testing.storage.DummyStorage object at ...>
 
+Rendering examples
+------------------
+
+For rendering, the vocabulary consumed by the mockup-structure-pattern
+should provide something::
+
+    >>> import json
+    >>> browser.open(
+    ...     'http://nohost/plone/storage_enabled/getStorageVocabulary')
+    >>> result = json.loads(browser.contents)
+    >>> result == {"total": 0, "results": []}
+    True
+
+A repository with some existing data will of course have data inside::
+
+    >>> from zope.component import getUtility
+    >>> from repodono.storage.interfaces import IStorageBackend
+    >>> from repodono.storage.testing.storage import path
+    >>> backend = getUtility(IStorageBackend, name=u'dummy_backend')
+    >>> backend.load_dir('storage_enabled', path('testrepo_alt'))
+    >>> browser.open(
+    ...     'http://nohost/plone/storage_enabled/getStorageVocabulary')
+    >>> result = json.loads(browser.contents)
+    >>> result['total']
+    3
+    >>> names = [(r['Title'], r['portal_type']) for r in result['results']]
+    >>> names
+    [(u'dir1', u'folder'), (u'a_file', u'document'), (u'file3', u'document')]
+
 Filesystem integration
 ----------------------
 

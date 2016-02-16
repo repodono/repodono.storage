@@ -87,14 +87,20 @@ class StorageVocabularyView(StorageBrowserView):
             storage.checkout(self.commit)
         # use the normalized revision identifier.
         self.commit = storage.rev
-        files = storage.listdir('/'.join(self.subpath))
+
+        def pathinfo(p):
+            return p, storage.pathinfo(p)
+
+        fileinfo = sorted(
+            (
+                pathinfo('/'.join(self.subpath + [fn]))
+                for fn in storage.listdir('/'.join(self.subpath))
+            ),
+            key=lambda x: (x[1]['type'] == 'file', x[1]['basename']))
 
         results = []
 
-        for filename in files:
-            filepath = '/'.join(self.subpath + [filename])
-            info = storage.pathinfo(filepath)
-
+        for filepath, info in fileinfo:
             # for the styling.
             if info['type'] == 'file':
                 info['type'] = 'document'
