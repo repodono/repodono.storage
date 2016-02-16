@@ -2,7 +2,6 @@
 import tempfile
 import shutil
 from os.path import join
-from os.path import dirname
 from os.path import exists
 
 from zope.component import getUtility
@@ -35,7 +34,7 @@ from repodono.storage.testing.storage import DummyStorageData
 
 import unittest
 
-path = lambda p: join(dirname(storage.__file__), 'data', p)
+path = storage.path
 
 
 class DummyStorageBackendTestCase(unittest.TestCase):

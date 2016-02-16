@@ -3,6 +3,7 @@ from datetime import datetime
 from logging import getLogger
 from glob import glob
 from os.path import join
+from os.path import dirname
 from os.path import relpath
 from os import walk
 import json
@@ -20,6 +21,7 @@ from repodono.storage.exceptions import RevisionNotFoundError
 from repodono.storage.exceptions import StorageNotFoundError
 
 logger = getLogger(__name__)
+path = lambda p: join(dirname(__file__), 'data', p)
 
 
 def readfile(fullpath):
