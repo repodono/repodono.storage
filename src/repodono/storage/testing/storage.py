@@ -208,7 +208,7 @@ class DummyStorage(BaseStorage):
             i.replace(path, '').split('/')[0]
             for i in self.files() if i.startswith(path)
         })
-        if not result:
+        if not result and path:
             raise PathNotDirError()
         return result
 

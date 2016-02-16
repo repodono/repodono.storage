@@ -92,6 +92,15 @@ class DummyStorageTestCase(unittest.TestCase):
         item = Item(id='not_installed')
         self.assertRaises(StorageNotFoundError, self.backend.acquire, item)
 
+    def test_acquire_new_install(self):
+        item = Item(id='new')
+        self.backend.install(item)
+        storage = self.backend.acquire(item)
+        self.assertEqual(item, storage.context)
+        self.assertEqual(storage.rev, '0')
+        self.assertEqual(storage.files(), [])
+        self.assertEqual(storage.listdir(''), [])
+
     def test_acquire_basic(self):
         item = Item(id='dummy_a')
         storage = self.backend.acquire(item)
