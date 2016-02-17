@@ -7,8 +7,6 @@ from plone.app.content.utils import json_dumps
 from plone.uuid.interfaces import IUUID
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone import PloneMessageFactory as _
-from Products.CMFPlone import utils
-from Products.CMFPlone.interfaces import IPloneSiteRoot
 from Products.Five import BrowserView
 from zope.i18n import translate
 from zope.interface import implementer
@@ -205,18 +203,10 @@ class StorageContextInfo(BrowserView):
 
     def __call__(self):
         context = aq_inner(self.context)
-        crumbs = []
-        while not IPloneSiteRoot.providedBy(context):
-            crumbs.append({
-                'id': context.getId(),
-                'title': utils.pretty_title_or_id(context, context)
-            })
-            context = utils.parent(context)
-
         catalog = getToolByName(self.context, 'portal_catalog')
         try:
             brains = catalog(UID=IUUID(self.context))
-        except TypeError:
+        except TypeError:  # pragma: no cover
             brains = []
         item = None
         if len(brains) > 0:
@@ -236,7 +226,5 @@ class StorageContextInfo(BrowserView):
         return json_dumps({
             'addButtons': [],
             'defaultPage': self.context.getDefaultPage(),
-            # don't supply default portal objects as breadcrumbs.
-            # 'breadcrumbs': [c for c in reversed(crumbs)],
             'object': item
         })
