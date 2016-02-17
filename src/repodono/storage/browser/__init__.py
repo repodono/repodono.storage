@@ -11,6 +11,7 @@ from Products.Five import BrowserView
 from zope.i18n import translate
 from zope.interface import implementer
 from zope.publisher.interfaces import IPublishTraverse
+from zope.publisher.interfaces import NotFound
 
 from repodono.storage.interfaces import IStorage
 
@@ -132,7 +133,12 @@ class StorageVocabularyView(StorageBrowserView):
 
     def __call__(self):
         self.request.response.setHeader('Content-type', 'application/json')
-        items = self.get_items()
+
+        try:
+            items = self.get_items()
+        except KeyError:  # trap all related errors
+            raise NotFound(self.context, self.context.title_or_id())
+
         total = len(items)
         return json_dumps({
             'results': items,

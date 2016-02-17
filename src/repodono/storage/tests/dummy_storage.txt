@@ -141,6 +141,15 @@ Traversing down some path should definitely return the inner contents::
     [(u'dir2', u'folder'), (u'dir3', u'folder'), (u'f1', u'document'),
     (u'f2', u'document')]
 
+Traversing down some non-existent path should only result in a 404 and
+not some 500 server error::
+
+    >>> browser.open(  # doctest: +ELLIPSIS, +NORMALIZE_WHITESPACE
+    ...     'http://nohost/plone/storage_enabled/getStorageVocabulary/0/dir1')
+    Traceback (most recent call last):
+    ...
+    HTTPError: HTTP Error 404: Not Found
+
 Finally, the context information for this object should be returned
 using the customized view, like so::
 
