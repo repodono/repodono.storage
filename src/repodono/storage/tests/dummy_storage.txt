@@ -129,6 +129,18 @@ A repository with some existing data will of course have data inside::
     >>> names
     [(u'dir1', u'folder'), (u'a_file', u'document'), (u'file3', u'document')]
 
+Traversing down some path should definitely return the inner contents::
+
+    >>> browser.open(
+    ...     'http://nohost/plone/storage_enabled/getStorageVocabulary/4/dir1')
+    >>> result = json.loads(browser.contents)
+    >>> result['total']
+    4
+    >>> names = [(r['Title'], r['portal_type']) for r in result['results']]
+    >>> names  # doctest: +NORMALIZE_WHITESPACE
+    [(u'dir2', u'folder'), (u'dir3', u'folder'), (u'f1', u'document'),
+    (u'f2', u'document')]
+
 Filesystem integration
 ----------------------
 
