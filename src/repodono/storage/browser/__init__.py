@@ -71,6 +71,16 @@ class StorageBrowserView(BrowserView):
             self.subpath.append(name)
         return self
 
+    def update(self):
+        raise NotImplementedError  # pragma: no cover
+
+    def render(self):
+        return super(StorageBrowserView, self).__call__()
+
+    def __call__(self):
+        self.update()
+        return self.render()
+
 
 class StorageVocabularyView(StorageBrowserView):
 
@@ -146,7 +156,7 @@ class StorageContentsView(StorageBrowserView):
         # folder_contents view actually produce this.
         return []
 
-    def __call__(self):
+    def update(self):
         base_url = self.context.absolute_url()
         base_vocabulary = '%s/@@getStorageVocabulary' % base_url
         push_state_url = '%s/storage_contents{path}' % base_url
@@ -181,7 +191,6 @@ class StorageContentsView(StorageBrowserView):
             'collectionConstructor': 'repodonostorage-url/js/collection',
         }
         self.options = json_dumps(options)
-        return super(StorageContentsView, self).__call__()
 
 
 class StorageContextInfo(BrowserView):

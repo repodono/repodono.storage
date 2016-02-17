@@ -63,10 +63,50 @@ Should be possible to adapt directly to a storage::
 Rendering examples
 ------------------
 
+Test that the base view works generates the expected output, after
+assigning it a temporary view_name to allow its instantiation::
+
+    >>> from repodono.storage.browser import StorageContentsView
+    >>> import json
+    >>> StorageContentsView.view_name = 'storage_contents'
+    >>> view = StorageContentsView(portal.storage_enabled, portal.REQUEST)
+    >>> StorageContentsView.view_name = None
+    >>> view.update()
+    >>> options = json.loads(view.options)
+    >>> options['vocabularyUrl']
+    u'http://nohost/plone/storage_enabled/@@getStorageVocabulary'
+    >>> options['traverseSubpath']
+    u'/'
+
+Also do so through the browser.
+
+    >>> browser.open(
+    ...     'http://nohost/plone/storage_enabled/storage_contents')
+    >>> '<div id="storage_structure" class="pat-structure"' in browser.contents
+    True
+    >>> 'vocabularyUrl&quot;: &quot;http://nohost/plone/storage_enabled' in \
+    ...     browser.contents
+    True
+
+Traverse should generate the correct target URL
+
+    >>> StorageContentsView.view_name = 'storage_contents'
+    >>> view = StorageContentsView(portal.storage_enabled, portal.REQUEST)
+    >>> StorageContentsView.view_name = None
+    >>> view = view.publishTraverse(
+    ...     view.request, '0').publishTraverse(view.request, 'dir1')
+    >>> view.update()
+    >>> view.commit
+    '0'
+    >>> options = json.loads(view.options)
+    >>> options['vocabularyUrl']
+    u'http://nohost/plone/storage_enabled/@@getStorageVocabulary'
+    >>> options['traverseSubpath']
+    u'/0/dir1'
+
 For rendering, the vocabulary consumed by the mockup-structure-pattern
 should provide something::
 
-    >>> import json
     >>> browser.open(
     ...     'http://nohost/plone/storage_enabled/getStorageVocabulary')
     >>> result = json.loads(browser.contents)
