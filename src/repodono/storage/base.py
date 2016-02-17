@@ -32,6 +32,7 @@ class BaseStorage(object):
     _default_datefmt = {
         'rfc2822': '%a, %d %b %Y %H:%M:%S +0000',
         'rfc3339': '%Y-%m-%dT%H:%M:%SZ',
+        'rfc3339.local': '%Y-%m-%dT%H:%M:%S%z',
         'iso8601': '%Y-%m-%d %H:%M:%S',
     }
 
