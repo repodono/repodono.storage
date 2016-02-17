@@ -57,6 +57,9 @@ class BaseStorage(object):
     def __init__(self, context):
         self.context = context
 
+    def strftime(self, dt):
+        return dt.strftime(self.datefmtstr)
+
     def basename(self, path):
         raise NotImplementedError
 

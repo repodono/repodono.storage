@@ -135,7 +135,7 @@ class DummyStorage(BaseStorage):
         if rev is None:
             i = self._rev
         ts = datetime.utcfromtimestamp(i * 9876 + 1111111111 + 46800)
-        return ts.strftime(self.datefmtstr)
+        return self.strftime(ts)
 
     def _data(self):
         rawdata = DummyStorageData._data
