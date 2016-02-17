@@ -141,6 +141,17 @@ Traversing down some path should definitely return the inner contents::
     [(u'dir2', u'folder'), (u'dir3', u'folder'), (u'f1', u'document'),
     (u'f2', u'document')]
 
+Finally, the context information for this object should be returned
+using the customized view, like so::
+
+    >>> browser.open(
+    ...     'http://nohost/plone/storage_enabled/@@sc-contextInfo')
+    >>> result = json.loads(browser.contents)
+    >>> result['addButtons']
+    []
+    >>> result['object']['portal_type']
+    u'storage_enabled'
+
 Filesystem integration
 ----------------------
 
