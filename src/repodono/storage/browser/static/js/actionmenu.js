@@ -7,7 +7,7 @@ define([
   var ActionMenu = function(menu) {
     var result = {};
     result['open'] = ['', '', menu.model.attributes.viewURL, 'Open'];
-    if (!menu.model.attributes.is_folderish) {
+    if (menu.model.attributes.portal_type === "document") {
       result['download'] = ['', '', menu.model.attributes.viewURL, 'Download'];
     }
     return result;
