@@ -18,3 +18,12 @@ htmlcov/
 *.log
 output.xml
 *.swp
+package.json
+bower.json
+include/
+lib/
+local/
+build/
+bower_components/
+node_modules/
+stamp-*
