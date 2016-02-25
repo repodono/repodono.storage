@@ -8,9 +8,11 @@ install:
   - bin/pip install --no-deps -e git+https://github.com/repodono/repodono.registry.git#egg=repodono.registry
   - bin/pip install zc.buildout
   - bin/buildout -Nc travis.cfg
+  - sh bootstrap-js.sh
 script:
   - bin/code-analysis
   - bin/coverage run --source=src bin/test
+  - make test
 after_success:
   - pip install -q coveralls==0.5
   - coveralls
