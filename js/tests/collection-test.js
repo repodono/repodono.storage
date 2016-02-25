@@ -20,6 +20,16 @@ define([
   window.mocha.setup('bdd');
   $.fx.off = true;
 
+  var history = {
+    'pushState': function(data, title, url) {
+      history.pushed = {
+        data: data,
+        title: title,
+        url: url
+      };
+    }
+  };
+
   var traverseSubpath = '';
 
   var initStructure = function(self) {
@@ -54,12 +64,17 @@ define([
   describe('Custom collection test', function() {
     beforeEach(function() {
       this.clock = sinon.useFakeTimers();
+      this.sandbox = sinon.sandbox.create();
+      this.sandbox.stub(window, 'history', history);
 
       this.server = sinon.fakeServer.create();
       this.server.autoRespond = true;
       this.server.respondWith('GET', /json/, function (xhr, id) {
+        traverseSubpath = xhr.url.substr(
+          0, xhr.url.indexOf('?')).replace('/json/', '');
         var commit = '0';
-        var targetPath = traverseSubpath || '/' + commit;
+        var targetPath = (traverseSubpath === '/' ?
+          '/' + commit : traverseSubpath);
 
         var items = [{
           'Title': 'folder',
@@ -87,6 +102,7 @@ define([
 
     afterEach(function() {
       this.server.restore();
+      this.sandbox.restore();
       this.clock.restore();
       this.$el.remove();
 
@@ -110,6 +126,54 @@ define([
 
       expect($('.open a', doc).text()).to.eql('Open');
       expect($('.download a', doc).text()).to.eql('Download');
+
+    });
+
+    it('navigation', function() {
+      initStructure(this);
+
+      expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
+        'http://localhost:8081/view/0/folder')
+      $('.itemRow .title a', this.$el).eq(0).trigger('click');
+      this.clock.tick(1000);
+
+      expect(traverseSubpath).to.eql('/0/folder')
+      expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
+        'http://localhost:8081/view/0/folder/folder')
+      $('.itemRow .title a', this.$el).eq(0).trigger('click');
+      this.clock.tick(1000);
+
+      expect(traverseSubpath).to.eql('/0/folder/folder')
+      expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
+        'http://localhost:8081/view/0/folder/folder/folder')
+      $('.itemRow .title a', this.$el).eq(0).trigger('click');
+      this.clock.tick(1000);
+
+      expect(traverseSubpath).to.eql('/0/folder/folder/folder')
+      expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
+        'http://localhost:8081/view/0/folder/folder/folder/folder')
+
+      // pop back up a couple steps via breadcrumbs
+      var crumb1 = $('.fc-breadcrumbs a.crumb', this.$el).eq(1)
+      crumb1.trigger('click');
+      this.clock.tick(1000);
+      expect(traverseSubpath).to.eql('/0/folder')
+      expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
+        'http://localhost:8081/view/0/folder/folder')
+    });
+
+    it('initialize with predefined traverseSubpath', function() {
+      traverseSubpath = '/2/folder';
+      initStructure(this);
+
+      expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
+        'http://localhost:8081/view/2/folder/folder')
+      $('.itemRow .title a', this.$el).eq(0).trigger('click');
+      this.clock.tick(1000);
+
+      expect(traverseSubpath).to.eql('/2/folder/folder')
+      expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
+        'http://localhost:8081/view/2/folder/folder/folder')
 
     });
 
