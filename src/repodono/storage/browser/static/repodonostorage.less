@@ -1,3 +1,21 @@
+/*
+  No idea how they disabled this in Products.CMFCore, I guess their devs
+  want to hide caret by default or something.  Will explicitly enable it
+  here by copying the bootstrap less rules directly to here.
+*/
+
+@caret-width-base: 4px;
+.storage-dropdown .caret {
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: 2px;
+  vertical-align: middle;
+  border-top:   @caret-width-base dashed;
+  border-right: @caret-width-base solid transparent;
+  border-left:  @caret-width-base solid transparent;
+}
+
 .storage-dropdown .heading {
   font-weight: 300;
 }
