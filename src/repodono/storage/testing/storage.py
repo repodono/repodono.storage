@@ -279,6 +279,20 @@ class DummyStorage(BaseStorage):
             result['type'] = 'folder'
             return result
 
+    def tags(self):
+        # static dummy value for now.
+        return (
+            ('initial', '0'),
+            ('release', '3'),
+        )
+
+    def branches(self):
+        # static dummy value for now.
+        return (
+            ('default', '4'),
+            ('develop', '1'),
+        )
+
 
 class DummyFSStorageBackend(BaseStorageBackend):
     """
