@@ -34,6 +34,7 @@ module.exports = function(config) {
       {pattern: 'js/**/*', included: false},
       {pattern: 'lib/**/*', included: false},
       {pattern: 'src/repodono/storage/browser/static/js/**/*', included: false},
+      {pattern: 'src/repodono/storage/browser/static/templates/**/*', included: false},
     ],
 
     // list of files to exclude
