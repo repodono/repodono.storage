@@ -264,6 +264,22 @@ class DummyStorageTestCase(unittest.TestCase):
             u'type': u'subrepo',
         })
 
+    def test_branches(self):
+        item = Item(id='dummy_a')
+        storage = self.backend.acquire(item)
+        self.assertEqual(storage.branches(), (
+            ('default', '4'),
+            ('develop', '1'),
+        ))
+
+    def test_tags(self):
+        item = Item(id='dummy_a')
+        storage = self.backend.acquire(item)
+        self.assertEqual(storage.tags(), (
+            ('initial', '0'),
+            ('release', '3'),
+        ))
+
 
 class DummyFSStorageBackendTestCase(unittest.TestCase):
 

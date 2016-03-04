@@ -114,6 +114,18 @@ class IStorage(Interface):
         Return the basename of the given path.
         """
 
+    def branches(path):
+        """
+        Return an n-tuple of 2-tuple in the form (name, rev) for the
+        branches.
+        """
+
+    def tags(path):
+        """
+        Return an n-tuple of 2-tuple in the form (name, rev) for the
+        tags.
+        """
+
     def checkout(rev=None):
         """
         Activate the revision identify by the rev.  All file operations
