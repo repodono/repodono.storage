@@ -209,6 +209,7 @@ class StorageContextInfo(BrowserView):
 
     def __call__(self):
         context = aq_inner(self.context)
+        storage = IStorage(self.context)
         catalog = getToolByName(self.context, 'portal_catalog')
         try:
             brains = catalog(UID=IUUID(self.context))
@@ -232,5 +233,8 @@ class StorageContextInfo(BrowserView):
         return json_dumps({
             'addButtons': [],
             'defaultPage': self.context.getDefaultPage(),
-            'object': item
+            'object': item,
+            'branches': storage.branches(),
+            'tags': storage.tags(),
+            'defaultRev': storage.rev,  # no checkout should have been done
         })

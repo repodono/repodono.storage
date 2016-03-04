@@ -161,6 +161,16 @@ using the customized view, like so::
     >>> result['object']['portal_type']
     u'storage_enabled'
 
+Also note that the associated tags and branches should also be available
+via this context info view, along with revision::
+
+    >>> result['defaultRev'] == '4'
+    True
+    >>> result['branches'] == [['default', '4'], ['develop', '1']]
+    True
+    >>> result['tags'] == [['initial', '0'], ['release', '3']]
+    True
+
 Filesystem integration
 ----------------------
 
