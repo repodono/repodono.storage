@@ -1,0 +1,6 @@
+<button class="btn btn-default btn-xs dropdown-toggle storage-dropdown" type="button" data-toggle="dropdown"><span class="heading"><%- heading %>:</span> <%- label %> <span class="caret"></span></button>
+<ul class="dropdown-menu">
+  <% _.each(branches, function(branch) { %>
+    <li><a href="#" class="crumb" data-path="/<%- branch[1] %>"><%- branch[0] %></a></li>
+  <% }); %>
+</ul>

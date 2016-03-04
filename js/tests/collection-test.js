@@ -36,6 +36,7 @@ define([
     var structure = {
       'vocabularyUrl': '/json',
       // dummy value.
+      'contextInfoUrl': '{path}/contextInfo',
       'indexOptionsUrl': '/tests/json/queryStringCriteria.json',
       'buttons': [],
       'activeColumns': ['ModificationDate', 'getObjSize'],
@@ -98,6 +99,15 @@ define([
         }));
       });
 
+      this.server.respondWith('GET', /contextInfo/, function (xhr, id) {
+        xhr.respond(200, {'Content-Type': 'application/json'}, JSON.stringify({
+          'defaultRev': '2',
+          'branches': [
+            ['master', '2'],
+          ],
+        }));
+      });
+
     });
 
     afterEach(function() {
@@ -127,39 +137,66 @@ define([
       expect($('.open a', doc).text()).to.eql('Open');
       expect($('.download a', doc).text()).to.eql('Download');
 
+      expect($('button.storage-dropdown', this.$el).text()).to.contain(
+        'branch: master');
+
     });
 
     it('navigation', function() {
       initStructure(this);
 
+      // simulating the mistiming
+      expect($('button.storage-dropdown', this.$el).text()).to.contain(
+        'branch: master');
+
       expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
-        'http://localhost:8081/view/0/folder')
+        'http://localhost:8081/view/0/folder');
       $('.itemRow .title a', this.$el).eq(0).trigger('click');
       this.clock.tick(1000);
 
+      // results from the mistiming, the revision is switched to the
+      // path specified.
+      expect($('button.storage-dropdown', this.$el).text()).to.contain(
+        'revision: 0');
+
+      // the first crumb (revision) should be hidden.
+      expect($('.fc-breadcrumbs > a.crumb', this.$el).eq(0).hasClass(
+        'hidden')).to.be(true);
+
       expect(traverseSubpath).to.eql('/0/folder')
       expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
-        'http://localhost:8081/view/0/folder/folder')
+        'http://localhost:8081/view/0/folder/folder');
       $('.itemRow .title a', this.$el).eq(0).trigger('click');
       this.clock.tick(1000);
 
       expect(traverseSubpath).to.eql('/0/folder/folder')
       expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
-        'http://localhost:8081/view/0/folder/folder/folder')
+        'http://localhost:8081/view/0/folder/folder/folder');
       $('.itemRow .title a', this.$el).eq(0).trigger('click');
       this.clock.tick(1000);
 
       expect(traverseSubpath).to.eql('/0/folder/folder/folder')
       expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
-        'http://localhost:8081/view/0/folder/folder/folder/folder')
+        'http://localhost:8081/view/0/folder/folder/folder/folder');
 
       // pop back up a couple steps via breadcrumbs
-      var crumb1 = $('.fc-breadcrumbs a.crumb', this.$el).eq(1)
+      var crumb1 = $('.fc-breadcrumbs > a.crumb', this.$el).eq(1)
       crumb1.trigger('click');
       this.clock.tick(1000);
-      expect(traverseSubpath).to.eql('/0/folder')
-      expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
-        'http://localhost:8081/view/0/folder/folder')
+      expect(traverseSubpath).to.eql('/0/folder');
+      expect($('.itemRow .title a', this.$el).attr('href')).to.equal(
+        'http://localhost:8081/view/0/folder/folder');
+
+      // now select the crumb inside the dropdown for the "master"
+      // branch
+      var crumb2 = $('.branch-selector a.crumb', this.$el).eq(0)
+      crumb2.trigger('click');
+      this.clock.tick(1000);
+      expect($('button.storage-dropdown', this.$el).text()).to.contain(
+        'branch: master');
+      expect(traverseSubpath).to.eql('/2');
+      expect($('.itemRow .title a', this.$el).attr('href')).to.equal(
+        'http://localhost:8081/view/2/folder');
     });
 
     it('initialize with predefined traverseSubpath', function() {
@@ -167,14 +204,16 @@ define([
       initStructure(this);
 
       expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
-        'http://localhost:8081/view/2/folder/folder')
+        'http://localhost:8081/view/2/folder/folder');
       $('.itemRow .title a', this.$el).eq(0).trigger('click');
       this.clock.tick(1000);
 
-      expect(traverseSubpath).to.eql('/2/folder/folder')
+      expect(traverseSubpath).to.eql('/2/folder/folder');
       expect($('.itemRow .title a', this.$el).attr('href')).to.eql(
-        'http://localhost:8081/view/2/folder/folder/folder')
+        'http://localhost:8081/view/2/folder/folder/folder');
 
+      expect($('button.storage-dropdown', this.$el).text()).to.contain(
+        'branch: master');
     });
 
   });
