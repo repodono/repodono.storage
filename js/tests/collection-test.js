@@ -216,6 +216,29 @@ define([
         'branch: master');
     });
 
+    it.skip('item deselection on storage-dropdown.', function() {
+      initStructure(this);
+      expect($('button.storage-dropdown', this.$el).text()).to.contain(
+        'branch: master');
+
+      // select checkbox.
+      $('.itemRow .selection input', this.$el).eq(0).trigger('click');
+      this.clock.tick(1000);
+
+      // dropdown should still be there.
+      expect($('button.storage-dropdown', this.$el).text()).to.contain(
+        'branch: master');
+
+      // select checkbox.
+      $('.itemRow .selection input', this.$el).eq(0).trigger('click');
+      this.clock.tick(1000);
+
+      // dropdown should still be there.
+      expect($('button.storage-dropdown', this.$el).text()).to.contain(
+        'branch: master');
+
+    });
+
   });
 
 });
