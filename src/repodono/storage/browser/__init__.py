@@ -170,10 +170,6 @@ class StorageContentsView(StorageBrowserView):
             'traverseView': True,
             # TODO verify that get_url result in a valid location dir.
             'traverseSubpath': self.get_current_path(),
-            'urlStructure': {
-                'base': base_url + '/storage_contents',
-                'appended': ''
-            },
             'indexOptionsUrl': '%s/@@qsOptions' % base_url,
             'contextInfoUrl': '%s/@@sc-contextInfo' % base_url,
             'attributes': attributes,
