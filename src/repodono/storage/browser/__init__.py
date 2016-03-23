@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+import json
 from collections import namedtuple
 
 from Acquisition import aq_inner
 from plone.app.content.browser.interfaces import IFolderContentsView
-from plone.app.content.utils import json_dumps
 from plone.uuid.interfaces import IUUID
 from Products.CMFCore.utils import getToolByName
 from Products.CMFPlone import PloneMessageFactory as _
@@ -140,7 +140,7 @@ class StorageVocabularyView(StorageBrowserView):
             raise NotFound(self.context, self.context.title_or_id())
 
         total = len(items)
-        return json_dumps({
+        return json.dumps({
             'results': items,
             'total': total,
         })
@@ -190,7 +190,7 @@ class StorageContentsView(StorageBrowserView):
             },
             'collectionConstructor': 'repodonostorage-url/js/collection',
         }
-        self.options = json_dumps(options)
+        self.options = json.dumps(options)
 
 
 class StorageContextInfo(BrowserView):
@@ -226,7 +226,7 @@ class StorageContextInfo(BrowserView):
                 if key == 'path':
                     val = val[len(base_path):]
                 item[key] = val
-        return json_dumps({
+        return json.dumps({
             'addButtons': [],
             'defaultPage': self.context.getDefaultPage(),
             'object': item,
